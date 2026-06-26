@@ -17,7 +17,7 @@
     </style>
 
     <!-- Section / card title -->
-    <style name="Label.Section">
+    <style name="Label.Section" parent="">
         <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/text_primary_light</item>
@@ -25,14 +25,14 @@
     </style>
 
     <!-- Small caption / metadata -->
-    <style name="Label.Caption">
+    <style name="Label.Caption" parent="">
         <item name="android:textSize">11sp</item>
         <item name="android:textColor">@color/text_secondary_light</item>
         <item name="android:letterSpacing">0.02</item>
     </style>
 
     <!-- Monospace, used for stats, ids, code -->
-    <style name="Text.Mono">
+    <style name="Text.Mono" parent="">
         <item name="android:fontFamily">monospace</item>
         <item name="android:textColor">@color/text_primary_light</item>
     </style>
