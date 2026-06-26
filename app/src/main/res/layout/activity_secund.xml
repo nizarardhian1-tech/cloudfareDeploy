@@ -1,0 +1,89 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_editor_bg"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_light"
+    android:padding="16dp">
+
+    <!-- Top Info and Quick Actions -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:id="@+id/tv_worker_name"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Editing: Loading..."
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="@color/text_primary_light"/>
+
+        <!-- Copy URL Clickable Text -->
+        <TextView
+            android:id="@+id/tv_copy_url"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📋 Copy Link"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:padding="6dp"
+            android:textColor="@color/cf_orange"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
+    <!-- Code Editor Box -->
+    <EditText
+        android:id="@+id/et_code_editor"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_editor"
+        android:gravity="top|start"
+        android:hint="// Fetching script code from Cloudflare..."
+        android:inputType="textMultiLine|textNoSuggestions"
+        android:padding="12dp"
+        android:scrollbars="vertical|horizontal"
+        android:fontFamily="monospace"
+        android:textSize="13sp"
+        android:textColor="@color/text_primary_light" />
+
+    <!-- Action Buttons Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
+
+        <Button
+            android:id="@+id/btn_secrets"
+            android:layout_width="0dp"
+            android:layout_weight="1.2"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_button"
+            android:text="Manage Secrets 🔑"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginRight="8dp"/>
+
+        <Button
+            android:id="@+id/btn_deploy"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_button"
+            android:text="Deploy 🚀"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+</LinearLayout>
