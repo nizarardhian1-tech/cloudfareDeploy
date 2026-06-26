@@ -1,20 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- Brand / accent -->
+    <color name="cf_orange">#F38020</color>
+    <color name="cf_orange_dark">#D96B16</color>
+    <color name="cf_orange_soft">#FFE8D2</color>
+
     <color name="colorPrimary">#F38020</color>
     <color name="colorPrimaryDark">#D96B16</color>
     <color name="colorAccent">#F38020</color>
-    
-    <!-- Warna Cloudep -->
-    <color name="cf_orange">#F38020</color>
-    <color name="cf_orange_dark">#D96B16</color>
-    
-    <color name="bg_light">#F8F9FA</color>
+
+    <!-- Status -->
+    <color name="status_online">#1E9E6B</color>
+    <color name="status_online_bg">#E3F6EE</color>
+    <color name="status_offline">#D6483F</color>
+    <color name="status_offline_bg">#FBE7E5</color>
+
+    <!-- Surfaces (light) -->
+    <color name="bg_app">#F4F5F7</color>
+    <color name="bg_light">#F4F5F7</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="surface_elevated">#FFFFFF</color>
+    <color name="surface_stroke">#E2E5EA</color>
+    <color name="header_bg">#1A2230</color>
+
+    <!-- Text (light) -->
+    <color name="text_primary_light">#161B22</color>
+    <color name="text_secondary_light">#5B6472</color>
+    <color name="text_on_header">#F4F5F7</color>
+    <color name="text_on_header_secondary">#AEB6C2</color>
+    <color name="text_on_accent">#FFFFFF</color>
+
+    <!-- Legacy aliases kept for compatibility -->
     <color name="card_light">#FFFFFF</color>
-    <color name="text_primary_light">#1D1D1D</color>
-    <color name="text_secondary_light">#5F6368</color>
-    
-    <color name="bg_dark">#121212</color>
-    <color name="card_dark">#1E1E1E</color>
-    <color name="text_primary_dark">#FFFFFF</color>
-    <color name="text_secondary_dark">#A0A0A0</color>
+    <color name="bg_dark">#0B0F17</color>
+    <color name="card_dark">#141B26</color>
+    <color name="text_primary_dark">#E8EAED</color>
+    <color name="text_secondary_dark">#8A94A3</color>
+
 </resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Brand / accent (stays consistent across modes) -->
+    <color name="cf_orange">#F38020</color>
+    <color name="cf_orange_dark">#FFA75C</color>
+    <color name="cf_orange_soft">#3A2A18</color>
+
+    <color name="colorPrimary">#F38020</color>
+    <color name="colorPrimaryDark">#0B0F17</color>
+    <color name="colorAccent">#F38020</color>
+
+    <!-- Status -->
+    <color name="status_online">#3DDC97</color>
+    <color name="status_online_bg">#15302A</color>
+    <color name="status_offline">#FF6B61</color>
+    <color name="status_offline_bg">#3A1E1E</color>
+
+    <!-- Surfaces (dark navy/charcoal) -->
+    <color name="bg_app">#0B0F17</color>
+    <color name="bg_light">#0B0F17</color>
+    <color name="surface_card">#141B26</color>
+    <color name="surface_elevated">#1C2530</color>
+    <color name="surface_stroke">#2A3441</color>
+    <color name="header_bg">#0E1420</color>
+
+    <!-- Text (dark) -->
+    <color name="text_primary_light">#E8EAED</color>
+    <color name="text_secondary_light">#8A94A3</color>
+    <color name="text_on_header">#F4F5F7</color>
+    <color name="text_on_header_secondary">#7E8896</color>
+    <color name="text_on_accent">#0B0F17</color>
+
+    <!-- Legacy aliases kept for compatibility -->
+    <color name="card_light">#141B26</color>
+    <color name="bg_dark">#0B0F17</color>
+    <color name="card_dark">#141B26</color>
+    <color name="text_primary_dark">#E8EAED</color>
+    <color name="text_secondary_dark">#8A94A3</color>
+
+</resources>

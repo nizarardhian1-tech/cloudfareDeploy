@@ -152,10 +152,11 @@ public class LicenseActivity extends Activity {
     // 🔥 TOMBOL MAINTENANCE MODE — TAMBAHKAN DI SINI
     // ============================================================
     Button btnMaintenance = new Button(this);
-    btnMaintenance.setText("🔧 Maintenance Mode");
-    btnMaintenance.setBackgroundColor(Color.parseColor("#FF6B35"));
+    btnMaintenance.setText("Maintenance mode");
+    btnMaintenance.setBackgroundResource(getFnmods("bg_button", "drawable"));
     btnMaintenance.setTextColor(Color.WHITE);
     btnMaintenance.setAllCaps(false);
+    btnMaintenance.setTypeface(null, android.graphics.Typeface.BOLD);
     btnMaintenance.setPadding(20, 16, 20, 16);
     btnMaintenance.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -205,13 +206,17 @@ public class LicenseActivity extends Activity {
 		if (showKeys) {
 			layoutTabKeys.setVisibility(View.VISIBLE);
 			layoutTabLogs.setVisibility(View.GONE);
-			btnTabKeys.setBackgroundColor(Color.parseColor("#F38020"));
-			btnTabLogs.setBackgroundColor(Color.parseColor("#A0A0A0"));
+			btnTabKeys.setBackgroundResource(getFnmods("bg_tab_active", "drawable"));
+			btnTabKeys.setTextColor(Color.parseColor("#0B0F17"));
+			btnTabLogs.setBackgroundResource(getFnmods("bg_tab_inactive", "drawable"));
+			btnTabLogs.setTextColor(Color.parseColor("#8A94A3"));
 		} else {
 			layoutTabKeys.setVisibility(View.GONE);
 			layoutTabLogs.setVisibility(View.VISIBLE);
-			btnTabKeys.setBackgroundColor(Color.parseColor("#A0A0A0"));
-			btnTabLogs.setBackgroundColor(Color.parseColor("#F38020"));
+			btnTabKeys.setBackgroundResource(getFnmods("bg_tab_inactive", "drawable"));
+			btnTabKeys.setTextColor(Color.parseColor("#8A94A3"));
+			btnTabLogs.setBackgroundResource(getFnmods("bg_tab_active", "drawable"));
+			btnTabLogs.setTextColor(Color.parseColor("#0B0F17"));
 			syncLogsOnly();
 		}
 	}
@@ -237,18 +242,20 @@ public class LicenseActivity extends Activity {
     btnRow.setOrientation(LinearLayout.HORIZONTAL);
 
     final Button btnActivate = new Button(this);
-    btnActivate.setText("🔴 Aktifkan");
-    btnActivate.setBackgroundColor(Color.parseColor("#FF4444"));
+    btnActivate.setText("Aktifkan");
+    btnActivate.setBackgroundResource(getFnmods("bg_status_offline_solid", "drawable"));
     btnActivate.setTextColor(Color.WHITE);
     btnActivate.setAllCaps(false);
+    btnActivate.setTypeface(null, android.graphics.Typeface.BOLD);
     btnActivate.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
     btnActivate.setPadding(12, 12, 12, 12);
 
     final Button btnDeactivate = new Button(this);
-    btnDeactivate.setText("🟢 Nonaktifkan");
-    btnDeactivate.setBackgroundColor(Color.parseColor("#4CAF50"));
+    btnDeactivate.setText("Nonaktifkan");
+    btnDeactivate.setBackgroundResource(getFnmods("bg_status_online_solid", "drawable"));
     btnDeactivate.setTextColor(Color.WHITE);
     btnDeactivate.setAllCaps(false);
+    btnDeactivate.setTypeface(null, android.graphics.Typeface.BOLD);
     btnDeactivate.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
     btnDeactivate.setPadding(12, 12, 12, 12);
 
@@ -257,7 +264,7 @@ public class LicenseActivity extends Activity {
     layout.addView(btnRow);
 
     final AlertDialog dialog = new AlertDialog.Builder(this)
-        .setTitle("🔧 Maintenance Mode")
+        .setTitle("Maintenance mode")
         .setView(layout)
         .setNegativeButton("Tutup", null)
         .create();
@@ -313,10 +320,10 @@ private void fetchMaintenanceStatus(final TextView tvStatus) {
                                 JSONObject obj = new JSONObject(data);
                                 boolean active = obj.optBoolean("active", false);
                                 String msg = obj.optString("message", "");
-                                tvStatus.setText(active ? "🔴 Status: AKTIF\nPesan: " + msg : "🟢 Status: NONAKTIF");
-                                tvStatus.setTextColor(active ? Color.parseColor("#FF4444") : Color.parseColor("#4CAF50"));
+                                tvStatus.setText(active ? "Status: AKTIF\nPesan: " + msg : "Status: NONAKTIF");
+                                tvStatus.setTextColor(active ? Color.parseColor("#D6483F") : Color.parseColor("#1E9E6B"));
                             } catch (Exception e) {
-                                tvStatus.setText("❌ Gagal load status");
+                                tvStatus.setText("Gagal load status");
                             }
                         }
                     });
@@ -431,7 +438,7 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 		builder.setTitle("Create KV Namespace");
 		builder.setMessage("This will create a new Database table in your Cloudflare account automatically via REST API.");
 		builder.setView(input);
-		builder.setPositiveButton("Create ➕", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				String name = input.getText().toString().trim().replaceAll(" ", "_");
@@ -567,7 +574,7 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 						@Override
 						public void run() {
 							boolean isNight = mode.getString("night", "").equals("true");
-							tvSimResult.setTextColor(isNight ? Color.parseColor("#A0A0A0") : Color.parseColor("#5F6368"));
+							tvSimResult.setTextColor(isNight ? Color.parseColor("#8A94A3") : Color.parseColor("#5B6472"));
 							tvSimResult.setText("Status Code: " + code + "\n\nResponse:\n" + responseData);
 						}
 					});
@@ -577,7 +584,7 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							tvSimResult.setTextColor(Color.parseColor("#FF4444"));
+							tvSimResult.setTextColor(Color.parseColor("#D6483F"));
 							tvSimResult.setText("Error: " + finalE.getMessage());
 						}
 					});
@@ -594,40 +601,41 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 	private void applyTheme() {
 		boolean isNight = mode.getString("night", "").equals("true");
 		ActionBar actionBar = getActionBar();
-		
-		int cardBg = isNight ? Color.parseColor("#1E1E1E") : Color.parseColor("#FFFFFF");
-		int cardStroke = isNight ? Color.parseColor("#333333") : Color.parseColor("#EAEAEA");
-		int mainBg = isNight ? Color.parseColor("#121212") : Color.parseColor("#F8F9FA");
-		
+		float density = getResources().getDisplayMetrics().density;
+
+		int cardBg = isNight ? Color.parseColor("#141B26") : Color.parseColor("#FFFFFF");
+		int cardStroke = isNight ? Color.parseColor("#2A3441") : Color.parseColor("#E2E5EA");
+		int mainBg = isNight ? Color.parseColor("#0B0F17") : Color.parseColor("#F4F5F7");
+
 		linearLicenseBg.setBackgroundColor(mainBg);
-		
+
 		GradientDrawable gdSetup = new GradientDrawable();
 		gdSetup.setColor(cardBg);
-		gdSetup.setCornerRadius(16);
-		gdSetup.setStroke(2, cardStroke);
+		gdSetup.setCornerRadius(18 * density);
+		gdSetup.setStroke((int) (1 * density), cardStroke);
 		cardKvSetup.setBackground(gdSetup);
 
 		GradientDrawable gdKeys = new GradientDrawable();
 		gdKeys.setColor(cardBg);
-		gdKeys.setCornerRadius(16);
-		gdKeys.setStroke(2, cardStroke);
+		gdKeys.setCornerRadius(18 * density);
+		gdKeys.setStroke((int) (1 * density), cardStroke);
 		containerKeysList.setBackground(gdKeys);
 
 		GradientDrawable gdLogs = new GradientDrawable();
 		gdLogs.setColor(cardBg);
-		gdLogs.setCornerRadius(16);
-		gdLogs.setStroke(2, cardStroke);
+		gdLogs.setCornerRadius(18 * density);
+		gdLogs.setStroke((int) (1 * density), cardStroke);
 		containerLogsList.setBackground(gdLogs);
 
 		GradientDrawable gdSim = new GradientDrawable();
 		gdSim.setColor(cardBg);
-		gdSim.setCornerRadius(16);
-		gdSim.setStroke(2, cardStroke);
+		gdSim.setCornerRadius(18 * density);
+		gdSim.setStroke((int) (1 * density), cardStroke);
 		cardSimulator.setBackground(gdSim);
-		
-		int primaryColor = isNight ? Color.parseColor("#FFFFFF") : Color.parseColor("#1D1D1D");
-		int secondaryColor = isNight ? Color.parseColor("#A0A0A0") : Color.parseColor("#5F6368");
-		
+
+		int primaryColor = isNight ? Color.parseColor("#E8EAED") : Color.parseColor("#161B22");
+		int secondaryColor = isNight ? Color.parseColor("#8A94A3") : Color.parseColor("#5B6472");
+
 		tvKvNamespaceLabel.setTextColor(primaryColor);
 		tvKeysPlaceholder.setTextColor(secondaryColor);
 		tvLogsPlaceholder.setTextColor(secondaryColor);
@@ -640,9 +648,9 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 		etSimDevice.setTextColor(primaryColor);
 		etSimDevice.setHintTextColor(secondaryColor);
 		tvSimResult.setTextColor(secondaryColor);
-		
+
 		if (actionBar != null) {
-			actionBar.setBackgroundDrawable(new ColorDrawable(isNight ? Color.parseColor("#1E1E1E") : Color.parseColor("#F38020")));
+			actionBar.setBackgroundDrawable(new ColorDrawable(isNight ? Color.parseColor("#0E1420") : Color.parseColor("#F38020")));
 		}
 	}
 
@@ -741,9 +749,9 @@ private void setMaintenanceMode(final boolean active, final String message, fina
     containerLogsList.removeAllViews();
     
     boolean isNight = mode.getString("night", "").equals("true");
-    int primaryTextColor = isNight ? Color.parseColor("#FFFFFF") : Color.parseColor("#1D1D1D");
-    int secondaryTextColor = isNight ? Color.parseColor("#A0A0A0") : Color.parseColor("#5F6368");
-    int dividerColor = isNight ? Color.parseColor("#2C2C2C") : Color.parseColor("#EAEAEA");
+    int primaryTextColor = isNight ? Color.parseColor("#E8EAED") : Color.parseColor("#161B22");
+    int secondaryTextColor = isNight ? Color.parseColor("#8A94A3") : Color.parseColor("#5B6472");
+    int dividerColor = isNight ? Color.parseColor("#2A3441") : Color.parseColor("#E2E5EA");
 
     // 🔥 Kumpulkan key unik dari prefix count: dan devices:
     java.util.Set<String> uniqueKeys = new java.util.HashSet<>();
@@ -784,7 +792,7 @@ private void setMaintenanceMode(final boolean active, final String message, fina
             row.addView(tvName);
             
             // Tampilkan jumlah device (opsional, bisa ambil dari KV count)
-            String countStr = "🔑 License Key";
+            String countStr = "License key";
             TextView tvSub = new TextView(this);
             tvSub.setText(countStr);
             tvSub.setTextSize(11);
@@ -879,13 +887,13 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 									builder.setTitle("Key: " + keyName);
 									builder.setMessage("Max Devices Limit: " + maxDevices + "\n\nRegistered Hardware IDs:" + registeredListStr);
 									builder.setPositiveButton("Close", null);
-									builder.setNeutralButton("📊 Stats / Block", new DialogInterface.OnClickListener() {
+									builder.setNeutralButton("Stats / Block", new DialogInterface.OnClickListener() {
 										@Override
 										public void onClick(DialogInterface dialog, int which) {
 											fetchStatsForAdmin(keyName);
 										}
 									});
-									builder.setNegativeButton("Delete Key 🗑️", new DialogInterface.OnClickListener() {
+									builder.setNegativeButton("Delete Key", new DialogInterface.OnClickListener() {
 										@Override
 										public void onClick(DialogInterface dialog, int which) {
 											confirmDeleteKey(keyName);
@@ -897,13 +905,13 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 									builder.setTitle("Key: " + keyName);
 									builder.setMessage("Plain Text Value:\n" + responseData);
 									builder.setPositiveButton("Close", null);
-									builder.setNeutralButton("📊 Stats / Block", new DialogInterface.OnClickListener() {
+									builder.setNeutralButton("Stats / Block", new DialogInterface.OnClickListener() {
 										@Override
 										public void onClick(DialogInterface dialog, int which) {
 											fetchStatsForAdmin(keyName);
 										}
 									});
-									builder.setNegativeButton("Delete Key 🗑️", new DialogInterface.OnClickListener() {
+									builder.setNegativeButton("Delete Key", new DialogInterface.OnClickListener() {
 										@Override
 										public void onClick(DialogInterface dialog, int which) {
 											confirmDeleteKey(keyName);
@@ -1051,24 +1059,9 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 							if (code >= 200 && code < 300) {
 								try {
 									JSONObject obj = new JSONObject(responseData);
-									int total = obj.optInt("total_devices", 0);
 									JSONArray devices = obj.optJSONArray("devices");
 									if (devices == null) devices = new JSONArray();
-									StringBuilder msg = new StringBuilder();
-									msg.append("📊 Total Devices: ").append(total).append("\n\n");
-									if (devices.length() == 0) {
-										msg.append("Belum ada device yang pakai key ini.");
-									} else {
-										for (int i = 0; i < devices.length(); i++) {
-											JSONObject d = devices.getJSONObject(i);
-											msg.append("📱 Device: ").append(d.optString("device", "?")).append("\n");
-											msg.append("📍 Negara: ").append(d.optString("country", "?")).append("\n");
-											msg.append("🌐 IP: ").append(d.optString("ip", "?")).append("\n");
-											msg.append("🕒 First: ").append(d.optLong("first_used", 0)).append("\n");
-											msg.append("🕒 Last: ").append(d.optLong("last_used", 0)).append("\n\n");
-										}
-									}
-									showStatsDialog(keyName, msg.toString(), devices);
+									showStatsDialog(keyName, devices);
 								} catch (Exception e) {
 									UiHelper.showMessage(LicenseActivity.this, "Error parsing: " + e.getMessage());
 								}
@@ -1095,18 +1088,25 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 		}).start();
 	}
 
-	private void showStatsDialog(final String keyName, String statsText, final JSONArray devicesArray) {
+	private void showStatsDialog(final String keyName, final JSONArray devicesArray) {
     LinearLayout root = new LinearLayout(this);
     root.setOrientation(LinearLayout.VERTICAL);
     root.setPadding(20, 20, 20, 20);
     
     TextView header = new TextView(this);
-    header.setText("📊 " + keyName);
+    header.setText(keyName);
     header.setTextSize(16);
     header.setTypeface(null, android.graphics.Typeface.BOLD);
     header.setTextColor(Color.parseColor("#F38020"));
-    header.setPadding(0, 0, 0, 12);
+    header.setPadding(0, 0, 0, 2);
     root.addView(header);
+
+    TextView countCaption = new TextView(this);
+    countCaption.setText(devicesArray.length() + " device" + (devicesArray.length() == 1 ? "" : "s") + " terdaftar");
+    countCaption.setTextSize(11);
+    countCaption.setTextColor(Color.parseColor("#8A94A3"));
+    countCaption.setPadding(0, 0, 0, 14);
+    root.addView(countCaption);
 
     ScrollView scrollView = new ScrollView(this);
     scrollView.setLayoutParams(new LinearLayout.LayoutParams(-1, 400));
@@ -1114,10 +1114,12 @@ private void setMaintenanceMode(final boolean active, final String message, fina
     deviceContainer.setOrientation(LinearLayout.VERTICAL);
     deviceContainer.setPadding(0, 0, 0, 16);
 
+    final float density = getResources().getDisplayMetrics().density;
+
     if (devicesArray.length() == 0) {
         TextView empty = new TextView(this);
         empty.setText("Belum ada device yang pakai key ini.");
-        empty.setTextColor(Color.GRAY);
+        empty.setTextColor(Color.parseColor("#8A94A3"));
         empty.setPadding(0, 20, 0, 20);
         deviceContainer.addView(empty);
     } else {
@@ -1139,9 +1141,9 @@ private void setMaintenanceMode(final boolean active, final String message, fina
                 card.setLayoutParams(cardLp);
                 
                 GradientDrawable gd = new GradientDrawable();
-                gd.setColor(isBlocked ? Color.parseColor("#2C1515") : Color.parseColor("#1E1E1E"));
-                gd.setCornerRadius(12);
-                gd.setStroke(2, isBlocked ? Color.parseColor("#FF4444") : Color.parseColor("#333333"));
+                gd.setColor(isBlocked ? Color.parseColor("#241616") : Color.parseColor("#1C2530"));
+                gd.setCornerRadius(14 * density);
+                gd.setStroke((int) (1 * density), isBlocked ? Color.parseColor("#D6483F") : Color.parseColor("#2A3441"));
                 card.setBackground(gd);
 
                 LinearLayout row1 = new LinearLayout(this);
@@ -1152,27 +1154,28 @@ private void setMaintenanceMode(final boolean active, final String message, fina
                 tvDevice.setText(deviceId);
                 tvDevice.setTextSize(13);
                 tvDevice.setTypeface(null, android.graphics.Typeface.BOLD);
-                tvDevice.setTextColor(isBlocked ? Color.parseColor("#FF6666") : Color.WHITE);
+                tvDevice.setTextColor(isBlocked ? Color.parseColor("#FF6B61") : Color.parseColor("#E8EAED"));
                 tvDevice.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
                 row1.addView(tvDevice);
                 
                 TextView tvStatus = new TextView(this);
-                tvStatus.setText(isBlocked ? "🚫 BLOCKED" : "✅ ACTIVE");
+                tvStatus.setText(isBlocked ? "BLOCKED" : "ACTIVE");
                 tvStatus.setTextSize(10);
                 tvStatus.setTypeface(null, android.graphics.Typeface.BOLD);
-                tvStatus.setTextColor(isBlocked ? Color.parseColor("#FF4444") : Color.parseColor("#4CAF50"));
+                tvStatus.setTextColor(isBlocked ? Color.parseColor("#FF6B61") : Color.parseColor("#3DDC97"));
                 tvStatus.setPadding(10, 4, 10, 4);
                 GradientDrawable statusBg = new GradientDrawable();
-                statusBg.setCornerRadius(12);
-                statusBg.setColor(isBlocked ? Color.parseColor("#442222") : Color.parseColor("#224422"));
+                statusBg.setCornerRadius(100 * density);
+                statusBg.setColor(isBlocked ? Color.parseColor("#3A1E1E") : Color.parseColor("#15302A"));
                 tvStatus.setBackground(statusBg);
                 row1.addView(tvStatus);
                 card.addView(row1);
 
                 TextView tvGeo = new TextView(this);
-                tvGeo.setText("📍 " + country + "  •  🌐 " + ip);
+                tvGeo.setText(country + "  •  " + ip);
                 tvGeo.setTextSize(11);
-                tvGeo.setTextColor(Color.parseColor("#AAAAAA"));
+                tvGeo.setTypeface(android.graphics.Typeface.MONOSPACE);
+                tvGeo.setTextColor(Color.parseColor("#8A94A3"));
                 tvGeo.setPadding(0, 6, 0, 0);
                 card.addView(tvGeo);
 
@@ -1181,25 +1184,24 @@ private void setMaintenanceMode(final boolean active, final String message, fina
                     java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM HH:mm", java.util.Locale.US);
                     String firstStr = sdf.format(new java.util.Date(first * 1000));
                     String lastStr = sdf.format(new java.util.Date(last * 1000));
-                    tvTime.setText("🕒 First: " + firstStr + "  |  Last: " + lastStr);
+                    tvTime.setText("First: " + firstStr + "  |  Last: " + lastStr);
                 } else {
-                    tvTime.setText("🕒 Unknown time");
+                    tvTime.setText("Unknown time");
                 }
                 tvTime.setTextSize(10);
-                tvTime.setTextColor(Color.parseColor("#888888"));
+                tvTime.setTextColor(Color.parseColor("#6B7480"));
                 tvTime.setPadding(0, 4, 0, 8);
                 card.addView(tvTime);
 
                 final boolean finalIsBlocked = isBlocked;
                 final Button btnAction = new Button(this);
-                btnAction.setText(isBlocked ? "🔓 Unblock Device" : "🔒 Block Device");
+                btnAction.setText(isBlocked ? "Unblock device" : "Block device");
                 btnAction.setTextSize(11);
                 btnAction.setTypeface(null, android.graphics.Typeface.BOLD);
-                btnAction.setTextColor(Color.WHITE);
-                btnAction.setBackgroundColor(isBlocked ? Color.parseColor("#333333") : Color.parseColor("#F38020"));
+                btnAction.setTextColor(isBlocked ? Color.parseColor("#E8EAED") : Color.parseColor("#0B0F17"));
                 GradientDrawable btnBg = new GradientDrawable();
-                btnBg.setCornerRadius(8);
-                btnBg.setColor(isBlocked ? Color.parseColor("#333333") : Color.parseColor("#F38020"));
+                btnBg.setCornerRadius(10 * density);
+                btnBg.setColor(isBlocked ? Color.parseColor("#2A3441") : Color.parseColor("#F38020"));
                 btnAction.setBackground(btnBg);
                 btnAction.setPadding(12, 8, 12, 8);
                 btnAction.setAllCaps(false);
@@ -1208,7 +1210,7 @@ private void setMaintenanceMode(final boolean active, final String message, fina
                     @Override
                     public void onClick(View v) {
                         btnAction.setEnabled(false);
-                        btnAction.setText("⏳ Processing...");
+                        btnAction.setText("Processing...");
                         if (finalIsBlocked) {
                             unblockDevice(keyName, deviceId, new Runnable() {
                                 @Override public void run() {
@@ -1238,8 +1240,8 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 
     Button btnClose = new Button(this);
     btnClose.setText("Tutup");
-    btnClose.setTextColor(Color.WHITE);
-    btnClose.setBackgroundColor(Color.parseColor("#333333"));
+    btnClose.setTextColor(Color.parseColor("#F38020"));
+    btnClose.setBackgroundResource(getFnmods("bg_button_outline", "drawable"));
     btnClose.setAllCaps(false);
     root.addView(btnClose);
 
@@ -1423,7 +1425,7 @@ private void callBlockEndpoint(final String keyName, final String deviceId, fina
 		new AlertDialog.Builder(this)
 			.setTitle("Generate License Key")
 			.setView(layout)
-			.setPositiveButton("Create key 🔐", new DialogInterface.OnClickListener() {
+			.setPositiveButton("Create key", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					String key = etName.getText().toString().trim().toUpperCase();
@@ -1545,15 +1547,15 @@ private void handleScopeError(String responseData) {
 
 private void showScopeRequiredDialog(String errorMsg) {
     AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle("⚠️ Izin Token Kurang");
+    builder.setTitle("Izin Token Kurang");
     builder.setMessage("Token Cloudflare Anda tidak memiliki izin yang cukup.\n\n" +
             "Error: " + errorMsg + "\n\n" +
-            "📌 **Scope yang wajib diaktifkan:**\n" +
-            "✅ Account.Workers Scripts:Edit\n" +
-            "✅ Account.Workers KV:Edit\n" +
-            "✅ Account.Workers Secrets:Edit\n\n" +
+            "Scope yang wajib diaktifkan:\n" +
+            "- Account.Workers Scripts:Edit\n" +
+            "- Account.Workers KV:Edit\n" +
+            "- Account.Workers Secrets:Edit\n\n" +
             "Klik tombol di bawah untuk buat token baru.");
-    builder.setPositiveButton("🌐 Buka Browser", new DialogInterface.OnClickListener() {
+    builder.setPositiveButton("Buka Browser", new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://dash.cloudflare.com/profile/api-tokens"));

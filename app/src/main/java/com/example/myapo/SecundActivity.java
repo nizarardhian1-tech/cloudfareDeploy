@@ -93,34 +93,35 @@ public class SecundActivity extends Activity {
 	private void initializeLogic() {
 		boolean isNight = mode.getString("night", "").equals("true");
 		ActionBar actionBar = getActionBar();
+		float density = getResources().getDisplayMetrics().density;
 		
 		if (isNight) {
-			linearEditorBg.setBackgroundColor(Color.parseColor("#121212"));
-			tvWorkerName.setTextColor(Color.parseColor("#FFFFFF"));
+			linearEditorBg.setBackgroundColor(Color.parseColor("#0B0F17"));
+			tvWorkerName.setTextColor(Color.parseColor("#E8EAED"));
 			tvCopyUrl.setTextColor(Color.parseColor("#F38020"));
-			etCodeEditor.setTextColor(Color.parseColor("#E0E0E0"));
-			etCodeEditor.setHintTextColor(Color.parseColor("#5F6368"));
+			etCodeEditor.setTextColor(Color.parseColor("#E8EAED"));
+			etCodeEditor.setHintTextColor(Color.parseColor("#8A94A3"));
 			
 			GradientDrawable gd = new GradientDrawable();
-			gd.setColor(Color.parseColor("#1E1E1E"));
-			gd.setCornerRadius(16);
-			gd.setStroke(2, Color.parseColor("#333333"));
+			gd.setColor(Color.parseColor("#1C2530"));
+			gd.setCornerRadius(14 * density);
+			gd.setStroke((int) (1 * density), Color.parseColor("#2A3441"));
 			etCodeEditor.setBackground(gd);
 			
 			if (actionBar != null) {
-				actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1E1E1E")));
+				actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#0E1420")));
 			}
 		} else {
-			linearEditorBg.setBackgroundColor(Color.parseColor("#F8F9FA"));
-			tvWorkerName.setTextColor(Color.parseColor("#1D1D1D"));
+			linearEditorBg.setBackgroundColor(Color.parseColor("#F4F5F7"));
+			tvWorkerName.setTextColor(Color.parseColor("#161B22"));
 			tvCopyUrl.setTextColor(Color.parseColor("#F38020"));
-			etCodeEditor.setTextColor(Color.parseColor("#333333"));
-			etCodeEditor.setHintTextColor(Color.parseColor("#A0A0A0"));
+			etCodeEditor.setTextColor(Color.parseColor("#161B22"));
+			etCodeEditor.setHintTextColor(Color.parseColor("#5B6472"));
 			
 			GradientDrawable gd = new GradientDrawable();
 			gd.setColor(Color.parseColor("#FFFFFF"));
-			gd.setCornerRadius(16);
-			gd.setStroke(2, Color.parseColor("#DCDCDC"));
+			gd.setCornerRadius(14 * density);
+			gd.setStroke((int) (1 * density), Color.parseColor("#E2E5EA"));
 			etCodeEditor.setBackground(gd);
 			
 			if (actionBar != null) {
@@ -250,7 +251,7 @@ public class SecundActivity extends Activity {
 			});
 		}
 
-		builder.setPositiveButton("Add Secret 🔑", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton("Add Secret", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				showAddSecretDialog();
@@ -279,7 +280,7 @@ public class SecundActivity extends Activity {
 		new AlertDialog.Builder(this)
 			.setTitle("Upload Encrypted Secret")
 			.setView(layout)
-			.setPositiveButton("Upload Key 🛡️", new DialogInterface.OnClickListener() {
+			.setPositiveButton("Upload Key", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					String name = etName.getText().toString().trim().toUpperCase();

@@ -149,11 +149,11 @@ public class MainActivity extends Activity {
 		String currentToken = mode.getString("cf_api_token", "");
 		String accountName = mode.getString("cf_account_name", "Akun Default");
 		if (currentToken.isEmpty()) {
-			tvAccount.setText("Tap to Setup Token ⚙️");
+			tvAccount.setText("Tap to setup token");
 			tvSubdomain.setVisibility(View.GONE);
 			tvSwitchAccount.setVisibility(View.GONE);
 		} else {
-			tvAccount.setText("✅ " + accountName);
+			tvAccount.setText(accountName);
 			tvSwitchAccount.setVisibility(View.VISIBLE);
 		}
 	}
@@ -414,16 +414,16 @@ public class MainActivity extends Activity {
 
 	private void showScopeRequiredDialog(String errorMsg) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("⚠️ Izin Token Kurang");
+		builder.setTitle("Izin Token Kurang");
 		builder.setMessage("Token Cloudflare Anda tidak memiliki izin yang cukup.\n\n" +
 				"Error: " + errorMsg + "\n\n" +
-				"📌 **Scope yang wajib diaktifkan (Centang):**\n" +
-				"✅ Account.Workers Scripts:Edit\n" +
-				"✅ Account.Workers KV:Edit\n" +
-				"✅ Account.Workers Secrets:Edit\n" +
-				"✅ Account.Workers Subdomain:Edit (Opsional)\n\n" +
-				"🔹 Klik tombol di bawah untuk membuat Token baru di browser.");
-		builder.setPositiveButton("🌐 Buka Browser (Buat Token)", new DialogInterface.OnClickListener() {
+				"Scope yang wajib diaktifkan (centang):\n" +
+				"- Account.Workers Scripts:Edit\n" +
+				"- Account.Workers KV:Edit\n" +
+				"- Account.Workers Secrets:Edit\n" +
+				"- Account.Workers Subdomain:Edit (opsional)\n\n" +
+				"Klik tombol di bawah untuk membuat token baru di browser.");
+		builder.setPositiveButton("Buka browser (buat token)", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://dash.cloudflare.com/profile/api-tokens"));
@@ -441,10 +441,10 @@ public class MainActivity extends Activity {
 		input.setSingleLine(true);
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Create New Worker");
+		builder.setTitle("Create new worker");
 		builder.setMessage("Inisialisasi script Worker baru di Cloudflare.");
 		builder.setView(input);
-		builder.setPositiveButton("Create ➕", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				String name = input.getText().toString().trim().toLowerCase().replaceAll(" ", "-");
@@ -628,58 +628,66 @@ public class MainActivity extends Activity {
 	private void applyTheme() {
 		boolean isNight = mode.getString("night", "").equals("true");
 		ActionBar actionBar = getActionBar();
-		
-		int cardBg = isNight ? Color.parseColor("#1E1E1E") : Color.parseColor("#FFFFFF");
-		int cardStroke = isNight ? Color.parseColor("#333333") : Color.parseColor("#EAEAEA");
-		int mainBg = isNight ? Color.parseColor("#121212") : Color.parseColor("#F8F9FA");
-		
+
+		// Explicit palette per manual toggle state (independent of system DayNight,
+		// since this screen has its own dark/light switch via the ActionBar button)
+		int cardBg = isNight ? Color.parseColor("#141B26") : Color.parseColor("#FFFFFF");
+		int cardStroke = isNight ? Color.parseColor("#2A3441") : Color.parseColor("#E2E5EA");
+		int mainBg = isNight ? Color.parseColor("#0B0F17") : Color.parseColor("#F4F5F7");
+
 		linearMainBg.setBackgroundColor(mainBg);
-		
+
 		GradientDrawable gdWorkers = new GradientDrawable();
 		gdWorkers.setColor(cardBg);
-		gdWorkers.setCornerRadius(24);
-		gdWorkers.setStroke(2, cardStroke);
+		gdWorkers.setCornerRadius(dpToPx(18));
+		gdWorkers.setStroke(dpToPx(1), cardStroke);
 		cardWorkers.setBackground(gdWorkers);
 
 		GradientDrawable gdMonitor = new GradientDrawable();
 		gdMonitor.setColor(cardBg);
-		gdMonitor.setCornerRadius(24);
-		gdMonitor.setStroke(2, cardStroke);
+		gdMonitor.setCornerRadius(dpToPx(18));
+		gdMonitor.setStroke(dpToPx(1), cardStroke);
 		cardMonitor.setBackground(gdMonitor);
 
 		GradientDrawable gdDb = new GradientDrawable();
 		gdDb.setColor(cardBg);
-		gdDb.setCornerRadius(24);
-		gdDb.setStroke(2, cardStroke);
+		gdDb.setCornerRadius(dpToPx(18));
+		gdDb.setStroke(dpToPx(1), cardStroke);
 		cardDatabase.setBackground(gdDb);
-		
-		int primaryColor = isNight ? Color.parseColor("#FFFFFF") : Color.parseColor("#1D1D1D");
-		int secondaryColor = isNight ? Color.parseColor("#A0A0A0") : Color.parseColor("#5F6368");
-		
+
+		int primaryColor = isNight ? Color.parseColor("#E8EAED") : Color.parseColor("#161B22");
+		int secondaryColor = isNight ? Color.parseColor("#8A94A3") : Color.parseColor("#5B6472");
+
 		tvCardTitle1.setTextColor(primaryColor);
 		tvCardTitleDb.setTextColor(primaryColor);
 		tvCardDescDb.setTextColor(secondaryColor);
 		tvMonitorTitle.setTextColor(primaryColor);
-		
+
 		TextView tvLabel1 = findViewById(getFnmods("tv_label_status", "id"));
 		TextView tvLabel2 = findViewById(getFnmods("tv_label_limit", "id"));
 		TextView tvLabel3 = findViewById(getFnmods("tv_label_count", "id"));
 		if (tvLabel1 != null) tvLabel1.setTextColor(secondaryColor);
 		if (tvLabel2 != null) tvLabel2.setTextColor(secondaryColor);
 		if (tvLabel3 != null) tvLabel3.setTextColor(secondaryColor);
-		
+
 		tvStatLimit.setTextColor(primaryColor);
 		if (!tvStatStatus.getText().toString().equals("Online") && !tvStatStatus.getText().toString().equals("Offline")) {
 			tvStatStatus.setTextColor(primaryColor);
 		}
 		tvStatCount.setTextColor(primaryColor);
 		etSearchWorker.setTextColor(primaryColor);
-		
+
 		if (actionBar != null) {
-			actionBar.setBackgroundDrawable(new ColorDrawable(isNight ? Color.parseColor("#1E1E1E") : Color.parseColor("#F38020")));
+			int headerColor = isNight ? Color.parseColor("#0E1420") : Color.parseColor("#F38020");
+			actionBar.setBackgroundDrawable(new ColorDrawable(headerColor));
 		}
-		
+
 		loadCachedWorkers();
+	}
+
+	private int dpToPx(int dp) {
+		float density = getResources().getDisplayMetrics().density;
+		return (int) (dp * density);
 	}
 
 	@Override
@@ -703,7 +711,7 @@ public class MainActivity extends Activity {
 					populateWorkersList(cachedWorkersArray);
 					tvListPlaceholder.setVisibility(cachedWorkersArray.length() == 0 ? View.VISIBLE : View.GONE);
 					tvStatStatus.setText("Cached");
-					tvStatStatus.setTextColor(Color.parseColor("#FFA500"));
+					tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FFA75C") : Color.parseColor("#D96B16")));
 				}
 			} catch (Exception ignored) {}
 		}
@@ -723,9 +731,9 @@ public class MainActivity extends Activity {
 		tvListPlaceholder.setVisibility(View.GONE);
 		
 		boolean isNight = mode.getString("night", "").equals("true");
-		int primaryTextColor = isNight ? Color.parseColor("#FFFFFF") : Color.parseColor("#1D1D1D");
-		int secondaryTextColor = isNight ? Color.parseColor("#A0A0A0") : Color.parseColor("#5F6368");
-		int dividerColor = isNight ? Color.parseColor("#EAEAEA") : Color.parseColor("#2C2C2C");
+		int primaryTextColor = isNight ? Color.parseColor("#E8EAED") : Color.parseColor("#161B22");
+		int secondaryTextColor = isNight ? Color.parseColor("#8A94A3") : Color.parseColor("#5B6472");
+		int dividerColor = isNight ? Color.parseColor("#2A3441") : Color.parseColor("#E2E5EA");
 
 		for (int j = 0; j < resultArr.length(); j++) {
 			try {
@@ -776,9 +784,11 @@ public class MainActivity extends Activity {
 				
 				// Tombol Delete
 				TextView tvDelete = new TextView(this);
-				tvDelete.setText("🗑️");
-				tvDelete.setTextSize(18);
-				tvDelete.setPadding(16, 0, 8, 0);
+				tvDelete.setText("Hapus");
+				tvDelete.setTextSize(12);
+				tvDelete.setTypeface(null, android.graphics.Typeface.BOLD);
+				tvDelete.setTextColor(Color.parseColor("#D6483F"));
+				tvDelete.setPadding(20, 8, 8, 8);
 				tvDelete.setClickable(true);
 				tvDelete.setFocusable(true);
 				tvDelete.setOnClickListener(new View.OnClickListener() {
@@ -840,7 +850,7 @@ public class MainActivity extends Activity {
 			populateWorkersList(filtered);
 			if (filtered.length() == 0) {
 				tvListPlaceholder.setVisibility(View.VISIBLE);
-				tvListPlaceholder.setText("🔍 Script '" + query + "' tidak ditemukan.");
+				tvListPlaceholder.setText("Script '" + query + "' tidak ditemukan.");
 			} else {
 				tvListPlaceholder.setVisibility(View.GONE);
 			}
@@ -857,7 +867,7 @@ public class MainActivity extends Activity {
 		if (token.isEmpty() || accountId.isEmpty()) {
 			tvListPlaceholder.setText("Set your Cloudflare API Token above to begin.");
 			tvStatStatus.setText("Unconfigured");
-			tvStatStatus.setTextColor(Color.parseColor("#FFA500"));
+			tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FFA75C") : Color.parseColor("#D96B16")));
 			return;
 		}
 
@@ -898,7 +908,7 @@ public class MainActivity extends Activity {
 								if (responseCode < 200 || responseCode >= 300) {
 									tvListPlaceholder.setText("Error (" + responseCode + ")");
 									tvStatStatus.setText("Error");
-									tvStatStatus.setTextColor(Color.parseColor("#FF4444"));
+									tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
 									if (jsonResponse.contains("permission") || jsonResponse.contains("scope")) {
 										handleScopeError(jsonResponse);
 									}
@@ -914,7 +924,7 @@ public class MainActivity extends Activity {
 									populateWorkersList(resultArr);
 									tvListPlaceholder.setVisibility(resultArr.length() == 0 ? View.VISIBLE : View.GONE);
 									tvStatStatus.setText("Online");
-									tvStatStatus.setTextColor(Color.parseColor("#4CAF50"));
+									tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#3DDC97") : Color.parseColor("#1E9E6B")));
 									mode.edit().putString("cf_cached_scripts", jsonResponse).commit();
 								} else {
 									if (jsonResponse.contains("permission") || jsonResponse.contains("scope")) {
@@ -922,13 +932,13 @@ public class MainActivity extends Activity {
 									} else {
 										tvListPlaceholder.setText("Authorization Rejected");
 										tvStatStatus.setText("Rejected");
-										tvStatStatus.setTextColor(Color.parseColor("#FF4444"));
+										tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
 									}
 								}
 							} catch (Exception ex) {
 								tvListPlaceholder.setText("Failed to parse data");
 								tvStatStatus.setText("Parser Error");
-								tvStatStatus.setTextColor(Color.parseColor("#FF4444"));
+								tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
 							}
 						}
 					});
@@ -939,7 +949,7 @@ public class MainActivity extends Activity {
 							if (progressDialog != null) progressDialog.dismiss();
 							tvListPlaceholder.setText("Network error.");
 							tvStatStatus.setText("Offline");
-							tvStatStatus.setTextColor(Color.parseColor("#FF4444"));
+							tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
 						}
 					});
 				} finally {
@@ -987,7 +997,7 @@ public class MainActivity extends Activity {
 											String subdomain = result.optString("subdomain", "");
 											if (!subdomain.isEmpty()) {
 												mode.edit().putString("cf_subdomain", subdomain).commit();
-												tvSubdomain.setText("🌐 " + subdomain + ".workers.dev");
+												tvSubdomain.setText(subdomain + ".workers.dev");
 												tvSubdomain.setVisibility(View.VISIBLE);
 											}
 										}
