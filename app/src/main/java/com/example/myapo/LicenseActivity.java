@@ -650,7 +650,7 @@ private void setMaintenanceMode(final boolean active, final String message, fina
 		tvSimResult.setTextColor(secondaryColor);
 
 		if (actionBar != null) {
-			actionBar.setBackgroundDrawable(new ColorDrawable(isNight ? Color.parseColor("#0E1420") : Color.parseColor("#F38020")));
+			actionBar.setBackgroundDrawable(new ColorDrawable(isNight ? Color.parseColor("#0E1420") : Color.parseColor("#161D29")));
 		}
 	}
 
@@ -1145,6 +1145,7 @@ private void setMaintenanceMode(final boolean active, final String message, fina
                 gd.setCornerRadius(14 * density);
                 gd.setStroke((int) (1 * density), isBlocked ? Color.parseColor("#D6483F") : Color.parseColor("#2A3441"));
                 card.setBackground(gd);
+                card.setElevation(2 * density);
 
                 LinearLayout row1 = new LinearLayout(this);
                 row1.setOrientation(LinearLayout.HORIZONTAL);
@@ -1198,10 +1199,10 @@ private void setMaintenanceMode(final boolean active, final String message, fina
                 btnAction.setText(isBlocked ? "Unblock device" : "Block device");
                 btnAction.setTextSize(11);
                 btnAction.setTypeface(null, android.graphics.Typeface.BOLD);
-                btnAction.setTextColor(isBlocked ? Color.parseColor("#E8EAED") : Color.parseColor("#0B0F17"));
+                btnAction.setTextColor(Color.parseColor("#E8EAED"));
                 GradientDrawable btnBg = new GradientDrawable();
                 btnBg.setCornerRadius(10 * density);
-                btnBg.setColor(isBlocked ? Color.parseColor("#2A3441") : Color.parseColor("#F38020"));
+                btnBg.setColor(isBlocked ? Color.parseColor("#2A3441") : Color.parseColor("#3A4456"));
                 btnAction.setBackground(btnBg);
                 btnAction.setPadding(12, 8, 12, 8);
                 btnAction.setAllCaps(false);

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Brand / accent -->
+    <!-- Brand / accent - used sparingly: badges, links, borders, status -->
     <color name="cf_orange">#F38020</color>
     <color name="cf_orange_dark">#D96B16</color>
     <color name="cf_orange_soft">#FFE8D2</color>
 
-    <color name="colorPrimary">#F38020</color>
-    <color name="colorPrimaryDark">#D96B16</color>
+    <color name="colorPrimary">#1A2230</color>
+    <color name="colorPrimaryDark">#11161F</color>
     <color name="colorAccent">#F38020</color>
 
     <!-- Status -->
@@ -17,12 +17,17 @@
     <color name="status_offline_bg">#FBE7E5</color>
 
     <!-- Surfaces (light) -->
-    <color name="bg_app">#F4F5F7</color>
-    <color name="bg_light">#F4F5F7</color>
+    <color name="bg_app">#EEF0F3</color>
+    <color name="bg_light">#EEF0F3</color>
     <color name="surface_card">#FFFFFF</color>
-    <color name="surface_elevated">#FFFFFF</color>
+    <color name="surface_elevated">#F7F8FA</color>
     <color name="surface_stroke">#E2E5EA</color>
-    <color name="header_bg">#1A2230</color>
+    <color name="header_bg">#161D29</color>
+
+    <!-- Solid neutral buttons (primary actions, not orange) -->
+    <color name="button_solid">#1A2230</color>
+    <color name="button_solid_pressed">#11161F</color>
+    <color name="button_solid_text">#FFFFFF</color>
 
     <!-- Text (light) -->
     <color name="text_primary_light">#161B22</color>

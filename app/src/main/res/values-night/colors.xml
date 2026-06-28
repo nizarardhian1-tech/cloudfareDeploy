@@ -6,7 +6,7 @@
     <color name="cf_orange_dark">#FFA75C</color>
     <color name="cf_orange_soft">#3A2A18</color>
 
-    <color name="colorPrimary">#F38020</color>
+    <color name="colorPrimary">#161D29</color>
     <color name="colorPrimaryDark">#0B0F17</color>
     <color name="colorAccent">#F38020</color>
 
@@ -23,6 +23,11 @@
     <color name="surface_elevated">#1C2530</color>
     <color name="surface_stroke">#2A3441</color>
     <color name="header_bg">#0E1420</color>
+
+    <!-- Solid neutral buttons (primary actions, not orange) -->
+    <color name="button_solid">#232E3D</color>
+    <color name="button_solid_pressed">#2C394A</color>
+    <color name="button_solid_text">#E8EAED</color>
 
     <!-- Text (dark) -->
     <color name="text_primary_light">#E8EAED</color>

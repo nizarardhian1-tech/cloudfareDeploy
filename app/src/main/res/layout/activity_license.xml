@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg_app"
-    android:padding="16dp">
+    android:padding="20dp">
 
     <!-- Database KV Setup Bar -->
     <LinearLayout
@@ -14,8 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="14dp"
+        android:padding="18dp"
+        android:elevation="3dp"
+        android:layout_marginBottom="18dp"
         android:background="@drawable/bg_card">
 
         <TextView
@@ -30,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="9dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -50,9 +51,9 @@
             android:id="@+id/btn_create_namespace"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:layout_marginTop="12dp"
+            android:paddingTop="11dp"
+            android:paddingBottom="11dp"
             android:background="@drawable/bg_button_outline"
             android:text="Create KV namespace"
             android:textAllCaps="false"
@@ -66,37 +67,37 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="14dp">
+        android:layout_marginBottom="18dp">
 
         <Button
             android:id="@+id/btn_tab_keys"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="11dp"
+            android:paddingBottom="11dp"
             android:background="@drawable/bg_tab_active"
             android:text="Keys list"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textSize="13sp"
             android:textColor="#0B0F17"
-            android:layout_marginEnd="4dp"/>
+            android:layout_marginEnd="5dp"/>
 
         <Button
             android:id="@+id/btn_tab_logs"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="11dp"
+            android:paddingBottom="11dp"
             android:background="@drawable/bg_tab_inactive"
             android:text="GEO access logs"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textSize="13sp"
             android:textColor="@color/text_secondary_light"
-            android:layout_marginStart="4dp"/>
+            android:layout_marginStart="5dp"/>
     </LinearLayout>
 
     <ScrollView
@@ -122,23 +123,24 @@
                     android:id="@+id/btn_generate_key"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
+                    android:paddingTop="13dp"
+                    android:paddingBottom="13dp"
                     android:background="@drawable/bg_button"
                     android:text="Generate license key"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:textColor="@color/text_on_accent"
-                    android:layout_marginBottom="12dp"/>
+                    android:textColor="@color/button_solid_text"
+                    android:layout_marginBottom="14dp"/>
 
                 <LinearLayout
                     android:id="@+id/container_keys_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="8dp"
+                    android:padding="10dp"
+                    android:elevation="3dp"
                     android:background="@drawable/bg_card"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="18dp">
 
                     <TextView
                         android:id="@+id/tv_keys_placeholder"
@@ -147,7 +149,7 @@
                         android:text="No keys loaded. Set Namespace ID above."
                         android:textSize="12sp"
                         android:gravity="center"
-                        android:padding="20dp"
+                        android:padding="22dp"
                         android:textColor="@color/text_secondary_light"/>
                 </LinearLayout>
             </LinearLayout>
@@ -165,8 +167,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="8dp"
-                    android:layout_marginBottom="16dp"
+                    android:padding="10dp"
+                    android:elevation="3dp"
+                    android:layout_marginBottom="18dp"
                     android:background="@drawable/bg_card">
 
                     <TextView
@@ -176,7 +179,7 @@
                         android:text="No login logs collected yet."
                         android:textSize="12sp"
                         android:gravity="center"
-                        android:padding="20dp"
+                        android:padding="22dp"
                         android:textColor="@color/text_secondary_light"/>
                 </LinearLayout>
             </LinearLayout>
@@ -187,7 +190,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp"
+                android:padding="20dp"
+                android:elevation="3dp"
                 android:background="@drawable/bg_card">
 
                 <TextView
@@ -203,15 +207,15 @@
                     android:layout_height="wrap_content"
                     android:text="Simulate a validation check from your APK to test your script's integration."
                     android:textSize="11sp"
-                    android:layout_marginTop="4dp"
-                    android:lineSpacingExtra="2dp"
+                    android:layout_marginTop="5dp"
+                    android:lineSpacingExtra="3dp"
                     android:textColor="@color/text_secondary_light"/>
 
                 <EditText
                     android:id="@+id/et_sim_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="16dp"
                     android:hint="https://your-worker-url.workers.dev"
                     android:textSize="13sp"
                     android:fontFamily="monospace"
@@ -219,13 +223,13 @@
                     android:background="@drawable/bg_editor"
                     android:textColorHint="@color/text_secondary_light"
                     android:textColor="@color/text_primary_light"
-                    android:padding="12dp"/>
+                    android:padding="13dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="11dp">
 
                     <EditText
                         android:id="@+id/et_sim_key"
@@ -239,8 +243,8 @@
                         android:background="@drawable/bg_editor"
                         android:textColorHint="@color/text_secondary_light"
                         android:textColor="@color/text_primary_light"
-                        android:padding="12dp"
-                        android:layout_marginEnd="6dp"/>
+                        android:padding="13dp"
+                        android:layout_marginEnd="7dp"/>
 
                     <EditText
                         android:id="@+id/et_sim_device"
@@ -254,35 +258,35 @@
                         android:background="@drawable/bg_editor"
                         android:textColorHint="@color/text_secondary_light"
                         android:textColor="@color/text_primary_light"
-                        android:padding="12dp"
-                        android:layout_marginStart="6dp"/>
+                        android:padding="13dp"
+                        android:layout_marginStart="7dp"/>
                 </LinearLayout>
 
                 <Button
                     android:id="@+id/btn_run_sim"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
+                    android:layout_marginTop="16dp"
+                    android:paddingTop="13dp"
+                    android:paddingBottom="13dp"
                     android:background="@drawable/bg_button"
                     android:text="Run validation check"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:textColor="@color/text_on_accent"/>
+                    android:textColor="@color/button_solid_text"/>
 
                 <TextView
                     android:id="@+id/tv_sim_result"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="16dp"
                     android:text="Response output: waiting for simulation run..."
                     android:textSize="11sp"
                     android:textColor="@color/text_secondary_light"
                     android:fontFamily="monospace"
-                    android:lineSpacingExtra="2dp"
+                    android:lineSpacingExtra="3dp"
                     android:background="@drawable/bg_editor"
-                    android:padding="12dp"/>
+                    android:padding="13dp"/>
             </LinearLayout>
 
         </LinearLayout>

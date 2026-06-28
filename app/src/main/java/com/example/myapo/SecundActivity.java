@@ -125,7 +125,7 @@ public class SecundActivity extends Activity {
 			etCodeEditor.setBackground(gd);
 			
 			if (actionBar != null) {
-				actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#F38020")));
+				actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#161D29")));
 			}
 		}
 

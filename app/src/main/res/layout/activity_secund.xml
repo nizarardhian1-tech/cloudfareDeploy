@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg_app"
-    android:padding="16dp">
+    android:padding="20dp">
 
     <!-- Top Info and Quick Actions -->
     <LinearLayout
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="14dp">
+        android:layout_marginBottom="16dp">
 
         <TextView
             android:id="@+id/tv_worker_name"
@@ -34,10 +34,10 @@
             android:text="Copy link"
             android:textStyle="bold"
             android:textSize="12sp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
             android:background="@drawable/bg_text_action"
             android:textColor="@color/cf_orange"
             android:clickable="true"
@@ -52,14 +52,15 @@
         android:layout_weight="1"
         android:background="@drawable/bg_editor"
         android:gravity="top|start"
+        android:elevation="2dp"
         android:hint="// Fetching script code from Cloudflare..."
         android:textColorHint="@color/text_secondary_light"
         android:inputType="textMultiLine|textNoSuggestions"
-        android:padding="14dp"
+        android:padding="16dp"
         android:scrollbars="vertical|horizontal"
         android:fontFamily="monospace"
         android:textSize="13sp"
-        android:lineSpacingExtra="3dp"
+        android:lineSpacingExtra="4dp"
         android:textColor="@color/text_primary_light" />
 
     <!-- Action Buttons Row -->
@@ -67,15 +68,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="14dp">
+        android:layout_marginTop="16dp">
 
         <Button
             android:id="@+id/btn_secrets"
             android:layout_width="0dp"
             android:layout_weight="1.2"
             android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
+            android:paddingTop="13dp"
+            android:paddingBottom="13dp"
             android:background="@drawable/bg_button_outline"
             android:text="Manage secrets"
             android:textAllCaps="false"
@@ -88,13 +89,13 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
+            android:paddingTop="13dp"
+            android:paddingBottom="13dp"
             android:background="@drawable/bg_button"
             android:text="Deploy"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textColor="@color/text_on_accent" />
+            android:textColor="@color/button_solid_text" />
     </LinearLayout>
 
 </LinearLayout>

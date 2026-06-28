@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
 	private TextView tvAccount, tvSubdomain;
 	private TextView tvCardTitle1, tvCardTitleDb, tvCardDescDb, tvMonitorTitle;
 	private TextView tvStatStatus, tvStatLimit, tvStatCount;
+	private View viewStatusDot;
 	private TextView tvListPlaceholder, tvRefreshBtn, tvCreateWorkerBtn, tvSwitchAccount;
 	private Button btnManageLicenses;
 	
@@ -75,6 +76,7 @@ public class MainActivity extends Activity {
 		tvCardDescDb = findViewById(getFnmods("tv_card_desc_db","id"));
 		tvMonitorTitle = findViewById(getFnmods("tv_monitor_title","id"));
 		tvStatStatus = findViewById(getFnmods("tv_stat_status","id"));
+		viewStatusDot = findViewById(getFnmods("view_status_dot","id"));
 		tvStatLimit = findViewById(getFnmods("tv_stat_limit","id"));
 		tvStatCount = findViewById(getFnmods("tv_stat_count","id"));
 		tvListPlaceholder = findViewById(getFnmods("tv_list_placeholder","id"));
@@ -678,7 +680,7 @@ public class MainActivity extends Activity {
 		etSearchWorker.setTextColor(primaryColor);
 
 		if (actionBar != null) {
-			int headerColor = isNight ? Color.parseColor("#0E1420") : Color.parseColor("#F38020");
+			int headerColor = isNight ? Color.parseColor("#0E1420") : Color.parseColor("#161D29");
 			actionBar.setBackgroundDrawable(new ColorDrawable(headerColor));
 		}
 
@@ -711,6 +713,7 @@ public class MainActivity extends Activity {
 					populateWorkersList(cachedWorkersArray);
 					tvListPlaceholder.setVisibility(cachedWorkersArray.length() == 0 ? View.VISIBLE : View.GONE);
 					tvStatStatus.setText("Cached");
+					updateStatusDot(false);
 					tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FFA75C") : Color.parseColor("#D96B16")));
 				}
 			} catch (Exception ignored) {}
@@ -746,6 +749,11 @@ public class MainActivity extends Activity {
 				row.setOrientation(LinearLayout.HORIZONTAL);
 				row.setPadding(12, 16, 12, 16);
 				row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+				row.setClickable(true);
+				row.setFocusable(true);
+				android.util.TypedValue outValue = new android.util.TypedValue();
+				getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+				row.setBackgroundResource(outValue.resourceId);
 				
 				LinearLayout leftContainer = new LinearLayout(this);
 				leftContainer.setOrientation(LinearLayout.VERTICAL);
@@ -768,8 +776,11 @@ public class MainActivity extends Activity {
 				tvBadge.setTextSize(10);
 				tvBadge.setTypeface(null, android.graphics.Typeface.BOLD);
 				tvBadge.setTextColor(Color.parseColor("#FFFFFF"));
-				tvBadge.setBackgroundColor(Color.parseColor("#F38020"));
-				tvBadge.setPadding(8, 2, 8, 2);
+				GradientDrawable badgeBg = new GradientDrawable();
+				badgeBg.setColor(Color.parseColor("#F38020"));
+				badgeBg.setCornerRadius(100 * getResources().getDisplayMetrics().density);
+				tvBadge.setBackground(badgeBg);
+				tvBadge.setPadding(14, 4, 14, 4);
 				headerRow.addView(tvBadge);
 				leftContainer.addView(headerRow);
 				
@@ -867,6 +878,7 @@ public class MainActivity extends Activity {
 		if (token.isEmpty() || accountId.isEmpty()) {
 			tvListPlaceholder.setText("Set your Cloudflare API Token above to begin.");
 			tvStatStatus.setText("Unconfigured");
+			updateStatusDot(false);
 			tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FFA75C") : Color.parseColor("#D96B16")));
 			return;
 		}
@@ -908,6 +920,7 @@ public class MainActivity extends Activity {
 								if (responseCode < 200 || responseCode >= 300) {
 									tvListPlaceholder.setText("Error (" + responseCode + ")");
 									tvStatStatus.setText("Error");
+									updateStatusDot(false);
 									tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
 									if (jsonResponse.contains("permission") || jsonResponse.contains("scope")) {
 										handleScopeError(jsonResponse);
@@ -924,6 +937,7 @@ public class MainActivity extends Activity {
 									populateWorkersList(resultArr);
 									tvListPlaceholder.setVisibility(resultArr.length() == 0 ? View.VISIBLE : View.GONE);
 									tvStatStatus.setText("Online");
+									updateStatusDot(true);
 									tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#3DDC97") : Color.parseColor("#1E9E6B")));
 									mode.edit().putString("cf_cached_scripts", jsonResponse).commit();
 								} else {
@@ -932,12 +946,14 @@ public class MainActivity extends Activity {
 									} else {
 										tvListPlaceholder.setText("Authorization Rejected");
 										tvStatStatus.setText("Rejected");
+										updateStatusDot(false);
 										tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
 									}
 								}
 							} catch (Exception ex) {
 								tvListPlaceholder.setText("Failed to parse data");
 								tvStatStatus.setText("Parser Error");
+								updateStatusDot(false);
 								tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
 							}
 						}
@@ -949,6 +965,7 @@ public class MainActivity extends Activity {
 							if (progressDialog != null) progressDialog.dismiss();
 							tvListPlaceholder.setText("Network error.");
 							tvStatStatus.setText("Offline");
+							updateStatusDot(false);
 							tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
 						}
 					});
@@ -1028,5 +1045,11 @@ public class MainActivity extends Activity {
 	
 	public int getFnmods(String name, String type) {
 		return this.getBaseContext().getResources().getIdentifier(name, type, this.getBaseContext().getPackageName());
+	}
+
+	private void updateStatusDot(boolean online) {
+		if (viewStatusDot != null) {
+			viewStatusDot.setBackgroundResource(online ? getFnmods("dot_status_online", "drawable") : getFnmods("dot_status_offline", "drawable"));
+		}
 	}
 }
