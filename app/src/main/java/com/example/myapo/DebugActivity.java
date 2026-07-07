@@ -1,81 +1,39 @@
 package com.example.myapo;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.os.Process;
+import android.util.Log;
 
-public class DebugActivity extends Activity {
+import androidx.appcompat.app.AppCompatActivity;
 
-	private String[] exceptionTypes = {
-		"StringIndexOutOfBoundsException",
-		"IndexOutOfBoundsException",
-		"ArithmeticException",
-		"NumberFormatException",
-		"ActivityNotFoundException"
-	};
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-	private String[] exceptionMessages = {
-		"Invalid string operation\n",
-		"Invalid list operation\n",
-		"Invalid arithmetical operation\n",
-		"Invalid toNumber block operation\n",
-		"Invalid intent operation"
-	};
+public class DebugActivity extends AppCompatActivity {
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		Intent intent = getIntent();
-		String errorMessage = "";
-		String madeErrorMessage = "";
+        Intent intent  = getIntent();
+        String errMsg  = intent != null ? intent.getStringExtra("error") : "Unknown error.";
+        if (errMsg == null) errMsg = "Unknown error.";
 
-		if (intent != null) {
-			errorMessage = intent.getStringExtra("error");
-			String[] split = errorMessage.split("\n");
-			try {
-				for (int j = 0; j < exceptionTypes.length; j++) {
-					if (split[0].contains(exceptionTypes[j])) {
-						madeErrorMessage = exceptionMessages[j];
-						int addIndex = split[0].indexOf(exceptionTypes[j]) + exceptionTypes[j].length();
-						madeErrorMessage += split[0].substring(addIndex, split[0].length());
-						madeErrorMessage += "\n\nDetailed error message:\n" + errorMessage;
-						break;
-					}
-				}
-
-				if (madeErrorMessage.isEmpty()) {
-					madeErrorMessage = errorMessage;
-				}
-			} catch (Exception e) {
-				madeErrorMessage = madeErrorMessage + "\n\nError while getting error: " + Log.getStackTraceString(e);
-			}
-		}
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("An error occurred");
-		builder.setIcon(getFnmods("ic_launcher"));
-		builder.setMessage(madeErrorMessage);
-		builder.setCancelable(false);
-		builder.setPositiveButton("End Application", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				mFnRestart();
-			}
-		});
-		builder.create().show();
-	}
-
-	@Deprecated
-	public static void mFnRestart() {
-        Process.killProcess(Process.myPid());
+        final String display = errMsg;
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("App Error")
+            .setMessage(display)
+            .setCancelable(false)
+            .setPositiveButton("Close App", (d, w) -> {
+                Process.killProcess(Process.myPid());
+                System.exit(1);
+            })
+            .setNegativeButton("Restart", (d, w) -> {
+                Intent restart = new Intent(this, MainActivity.class);
+                restart.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(restart);
+                finish();
+            })
+            .show();
     }
-
-    public int getFnmods(String var1) {
-		return this.getBaseContext().getResources().getIdentifier(var1, "mipmap", this.getBaseContext().getPackageName());
-	}
 }

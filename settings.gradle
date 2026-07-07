@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Cloudep Manager"
+rootProject.name = "Cloudflare Manager"
 include ':app'

@@ -1,1055 +1,586 @@
 package com.example.myapo;
 
-import java.net.URL;
-import java.net.HttpURLConnection;
-import java.io.InputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import org.json.JSONObject;
-import org.json.JSONArray;
-
-import android.app.Activity;
-import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.MenuItem;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
+
+import com.example.myapo.network.CloudflareApi;
 import com.example.myapo.utils.UiHelper;
-
-@SuppressWarnings("deprecation")
-public class MainActivity extends Activity {
-	
-	private LinearLayout linearMainBg;
-	private LinearLayout cardWorkers;
-	private LinearLayout cardMonitor;
-	private LinearLayout cardDatabase;
-	private LinearLayout linearWorkersList;
-	
-	private TextView tvAccount, tvSubdomain;
-	private TextView tvCardTitle1, tvCardTitleDb, tvCardDescDb, tvMonitorTitle;
-	private TextView tvStatStatus, tvStatLimit, tvStatCount;
-	private View viewStatusDot;
-	private TextView tvListPlaceholder, tvRefreshBtn, tvCreateWorkerBtn, tvSwitchAccount;
-	private Button btnManageLicenses;
-	
-	private EditText etSearchWorker;
-	
-	private SharedPreferences mode;
-	private ProgressDialog progressDialog;
-	
-	private JSONArray cachedWorkersArray = new JSONArray();
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		initialize();
-		initializeLogic();
-	}
-
-	private void initialize() {
-		linearMainBg = findViewById(getFnmods("linear_main_bg","id"));
-		cardWorkers = findViewById(getFnmods("card_workers","id"));
-		cardMonitor = findViewById(getFnmods("card_monitor","id"));
-		cardDatabase = findViewById(getFnmods("card_database","id"));
-		linearWorkersList = findViewById(getFnmods("linear_workers_list","id"));
-		
-		tvAccount = findViewById(getFnmods("tv_account","id"));
-		tvSubdomain = findViewById(getFnmods("tv_subdomain","id"));
-		tvCardTitle1 = findViewById(getFnmods("tv_card_title1","id"));
-		tvCardTitleDb = findViewById(getFnmods("tv_card_title_db","id"));
-		tvCardDescDb = findViewById(getFnmods("tv_card_desc_db","id"));
-		tvMonitorTitle = findViewById(getFnmods("tv_monitor_title","id"));
-		tvStatStatus = findViewById(getFnmods("tv_stat_status","id"));
-		viewStatusDot = findViewById(getFnmods("view_status_dot","id"));
-		tvStatLimit = findViewById(getFnmods("tv_stat_limit","id"));
-		tvStatCount = findViewById(getFnmods("tv_stat_count","id"));
-		tvListPlaceholder = findViewById(getFnmods("tv_list_placeholder","id"));
-		tvRefreshBtn = findViewById(getFnmods("tv_refresh_btn","id"));
-		tvCreateWorkerBtn = findViewById(getFnmods("tv_create_worker_btn","id"));
-		tvSwitchAccount = findViewById(getFnmods("tv_switch_account","id"));
-		btnManageLicenses = findViewById(getFnmods("btn_manage_licenses","id"));
-		
-		etSearchWorker = findViewById(getFnmods("et_search_worker","id"));
-		
-		mode = getSharedPreferences("mode", Activity.MODE_PRIVATE);
-
-		// SEARCH
-		etSearchWorker.addTextChangedListener(new android.text.TextWatcher() {
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				filterWorkers(s.toString());
-			}
-			public void afterTextChanged(android.text.Editable s) {}
-		});
-
-		// SWITCH ACCOUNT
-		tvSwitchAccount.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showSwitchAccountDialog();
-			}
-		});
-
-		tvRefreshBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				fetchWorkersList(true);
-				fetchAccountSubdomain();
-			}
-		});
-
-		tvAccount.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				showApiTokenDialog();
-			}
-		});
-
-		btnManageLicenses.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(MainActivity.this, LicenseActivity.class);
-				startActivity(intent);
-			}
-		});
-
-		tvCreateWorkerBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showCreateWorkerDialog();
-			}
-		});
-	}
-	
-	private void initializeLogic() {
-		mViewToolbar.MFnmodsToolbar(MainActivity.this);
-		checkTokenStatus();
-		applyTheme();
-		
-		loadCachedWorkers();
-		fetchWorkersList(false);
-		fetchAccountSubdomain();
-	}
-
-	private void checkTokenStatus() {
-		String currentToken = mode.getString("cf_api_token", "");
-		String accountName = mode.getString("cf_account_name", "Akun Default");
-		if (currentToken.isEmpty()) {
-			tvAccount.setText("Tap to setup token");
-			tvSubdomain.setVisibility(View.GONE);
-			tvSwitchAccount.setVisibility(View.GONE);
-		} else {
-			tvAccount.setText(accountName);
-			tvSwitchAccount.setVisibility(View.VISIBLE);
-		}
-	}
-
-	// === SWITCH ACCOUNT ===
-	private void showSwitchAccountDialog() {
-		String accountsJson = mode.getString("cf_accounts_list", "[]");
-		final String[] accountNames;
-		final String[] accountData;
-		try {
-			JSONArray arr = new JSONArray(accountsJson);
-			accountNames = new String[arr.length()];
-			accountData = new String[arr.length()];
-			for (int i = 0; i < arr.length(); i++) {
-				JSONObject obj = arr.getJSONObject(i);
-				accountNames[i] = obj.getString("name") + " (" + obj.getString("account_id").substring(0, 8) + "...)";
-				accountData[i] = obj.toString();
-			}
-		} catch (Exception e) {
-			UiHelper.showMessage(this, "Gagal memuat daftar akun.");
-			return;
-		}
-
-		if (accountNames.length == 0) {
-			UiHelper.showMessage(this, "Belum ada akun tersimpan. Setup token dulu.");
-			return;
-		}
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Pilih Akun Cloudflare");
-		builder.setItems(accountNames, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				try {
-					JSONObject selected = new JSONObject(accountData[which]);
-					String token = selected.getString("token");
-					String accountId = selected.getString("account_id");
-					String name = selected.getString("name");
-					
-					mode.edit().putString("cf_api_token", token).commit();
-					mode.edit().putString("cf_account_id", accountId).commit();
-					mode.edit().putString("cf_account_name", name).commit();
-					
-					UiHelper.showMessage(MainActivity.this, "Berhasil switch ke: " + name);
-					checkTokenStatus();
-					fetchWorkersList(true);
-					fetchAccountSubdomain();
-				} catch (Exception e) {
-					UiHelper.showError(MainActivity.this, "Gagal switch akun.");
-				}
-			}
-		});
-		builder.setNegativeButton("Tambah Akun +", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				showApiTokenDialog();
-			}
-		});
-		builder.setNeutralButton("Hapus Akun", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				showDeleteAccountDialog();
-			}
-		});
-		builder.show();
-	}
-
-	private void showDeleteAccountDialog() {
-		String accountsJson = mode.getString("cf_accounts_list", "[]");
-		final String[] accountNames;
-		final JSONArray arr;
-		try {
-			arr = new JSONArray(accountsJson);
-			accountNames = new String[arr.length()];
-			for (int i = 0; i < arr.length(); i++) {
-				accountNames[i] = arr.getJSONObject(i).getString("name");
-			}
-		} catch (Exception e) {
-			UiHelper.showMessage(this, "Error membaca daftar.");
-			return;
-		}
-		if (accountNames.length == 0) return;
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Hapus Akun");
-		builder.setItems(accountNames, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				try {
-					arr.remove(which);
-					mode.edit().putString("cf_accounts_list", arr.toString()).commit();
-					UiHelper.showMessage(MainActivity.this, "Akun dihapus.");
-					checkTokenStatus();
-				} catch (Exception e) {
-					UiHelper.showError(MainActivity.this, "Gagal hapus.");
-				}
-			}
-		});
-		builder.show();
-	}
-
-	// === SETUP TOKEN ===
-	private void showApiTokenDialog() {
-		final EditText inputToken = new EditText(this);
-		inputToken.setHint("Paste Cloudflare API Token...");
-		inputToken.setSingleLine(true);
-		
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Tambah Akun Cloudflare");
-		builder.setMessage("Masukkan API Token. Aplikasi akan otomatis mendeteksi Account ID.");
-		builder.setView(inputToken);
-		builder.setPositiveButton("Simpan & Verifikasi", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				String newToken = inputToken.getText().toString().trim();
-				if (newToken.isEmpty()) {
-					UiHelper.showMessage(MainActivity.this, "Token tidak boleh kosong!");
-					return;
-				}
-				mode.edit().putString("cf_api_token", newToken).commit();
-				checkTokenStatus(); 
-				testAndFetchAccountId(true);
-			}
-		});
-		builder.setNegativeButton("Batal", null);
-		builder.show();
-	}
-
-	// === VERIFIKASI TOKEN ===
-	private void testAndFetchAccountId(final boolean saveToAccountList) {
-		final String token = mode.getString("cf_api_token", "");
-		if (token.isEmpty()) {
-			UiHelper.showMessage(this, "Token kosong!");
-			return;
-		}
-
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("Verifikasi Token...");
-		progressDialog.setCancelable(false);
-		progressDialog.show();
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				HttpURLConnection conn = null;
-				BufferedReader reader = null;
-				try {
-					URL url = new URL("https://api.cloudflare.com/client/v4/accounts");
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("GET");
-					conn.setRequestProperty("Authorization", "Bearer " + token);
-					conn.setRequestProperty("Content-Type", "application/json");
-					
-					int responseCode = conn.getResponseCode();
-					InputStream in = (responseCode >= 200 && responseCode < 300) ? conn.getInputStream() : conn.getErrorStream();
-					reader = new BufferedReader(new InputStreamReader(in));
-					StringBuilder sb = new StringBuilder();
-					String line;
-					while ((line = reader.readLine()) != null) sb.append(line);
-					final String jsonResponse = sb.toString();
-					
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (progressDialog != null) progressDialog.dismiss();
-							try {
-								JSONObject jsonObj = new JSONObject(jsonResponse);
-								boolean success = jsonObj.getBoolean("success");
-								
-								if (success) {
-									JSONArray resultArr = jsonObj.getJSONArray("result");
-									if (resultArr.length() > 0) {
-										JSONObject account = resultArr.getJSONObject(0);
-										String accountId = account.getString("id");
-										String accountName = account.getString("name");
-										
-										mode.edit().putString("cf_account_id", accountId).commit();
-										mode.edit().putString("cf_account_name", accountName).commit();
-										
-										if (saveToAccountList) {
-											saveAccountToPreferences(accountName, accountId, token);
-										}
-										
-										UiHelper.showMessage(MainActivity.this, "✅ Berhasil! Akun: " + accountName);
-										fetchWorkersList(false);
-										fetchAccountSubdomain();
-										checkTokenStatus();
-									}
-								} else {
-									handleScopeError(jsonResponse);
-								}
-							} catch (Exception ex) {
-								UiHelper.showError(MainActivity.this, "Gagal parsing response API.");
-							}
-						}
-					});
-					
-				} catch (final Exception ex) {
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (progressDialog != null) progressDialog.dismiss();
-							UiHelper.showError(MainActivity.this, "Network error: " + ex.getMessage());
-						}
-					});
-				} finally {
-					if (reader != null) {
-						try { reader.close(); } catch (Exception ignored) {}
-					}
-					if (conn != null) conn.disconnect();
-				}
-			}
-		}).start();
-	}
-
-	private void saveAccountToPreferences(String name, String accountId, String token) {
-		try {
-			String accountsJson = mode.getString("cf_accounts_list", "[]");
-			JSONArray arr = new JSONArray(accountsJson);
-			
-			boolean exists = false;
-			for (int i = 0; i < arr.length(); i++) {
-				if (arr.getJSONObject(i).getString("account_id").equals(accountId)) {
-					exists = true;
-					break;
-				}
-			}
-			if (!exists) {
-				JSONObject newAccount = new JSONObject();
-				newAccount.put("name", name);
-				newAccount.put("account_id", accountId);
-				newAccount.put("token", token);
-				arr.put(newAccount);
-				mode.edit().putString("cf_accounts_list", arr.toString()).commit();
-			}
-		} catch (Exception e) {
-			// ignore
-		}
-	}
-
-	// === SCOPE CHECKER ===
-	private void handleScopeError(String responseData) {
-		try {
-			JSONObject obj = new JSONObject(responseData);
-			JSONArray errors = obj.getJSONArray("errors");
-			if (errors.length() > 0) {
-				String msg = errors.getJSONObject(0).getString("message");
-				if (msg.toLowerCase().contains("permission") || msg.toLowerCase().contains("scope") || msg.toLowerCase().contains("authorization")) {
-					showScopeRequiredDialog(msg);
-					return;
-				}
-			}
-			UiHelper.showError(MainActivity.this, "Gagal: " + responseData);
-		} catch (Exception e) {
-			UiHelper.showError(MainActivity.this, "Error tidak dikenal: " + responseData);
-		}
-	}
-
-	private void showScopeRequiredDialog(String errorMsg) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Izin Token Kurang");
-		builder.setMessage("Token Cloudflare Anda tidak memiliki izin yang cukup.\n\n" +
-				"Error: " + errorMsg + "\n\n" +
-				"Scope yang wajib diaktifkan (centang):\n" +
-				"- Account.Workers Scripts:Edit\n" +
-				"- Account.Workers KV:Edit\n" +
-				"- Account.Workers Secrets:Edit\n" +
-				"- Account.Workers Subdomain:Edit (opsional)\n\n" +
-				"Klik tombol di bawah untuk membuat token baru di browser.");
-		builder.setPositiveButton("Buka browser (buat token)", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://dash.cloudflare.com/profile/api-tokens"));
-				startActivity(browserIntent);
-			}
-		});
-		builder.setNegativeButton("Tutup", null);
-		builder.show();
-	}
-
-	// === CREATE WORKER ===
-	private void showCreateWorkerDialog() {
-		final EditText input = new EditText(this);
-		input.setHint("script-name (e.g. apk-validator)");
-		input.setSingleLine(true);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Create new worker");
-		builder.setMessage("Inisialisasi script Worker baru di Cloudflare.");
-		builder.setView(input);
-		builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				String name = input.getText().toString().trim().toLowerCase().replaceAll(" ", "-");
-				if (!name.isEmpty()) {
-					createWorkerOnCloudflare(name);
-				} else {
-					UiHelper.showMessage(MainActivity.this, "Nama tidak boleh kosong!");
-				}
-			}
-		});
-		builder.setNegativeButton("Cancel", null);
-		builder.show();
-	}
-
-	private void createWorkerOnCloudflare(final String scriptName) {
-		final String token = mode.getString("cf_api_token", "");
-		final String accountId = mode.getString("cf_account_id", "");
-		
-		if (token.isEmpty() || accountId.isEmpty()) {
-			UiHelper.showMessage(this, "Token belum diatur.");
-			return;
-		}
-
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("Deploying script...");
-		progressDialog.setCancelable(false);
-		progressDialog.show();
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				HttpURLConnection conn = null;
-				BufferedReader reader = null;
-				try {
-					URL url = new URL("https://api.cloudflare.com/client/v4/accounts/" + accountId + "/workers/scripts/" + scriptName);
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setDoOutput(true);
-					conn.setRequestMethod("PUT");
-					conn.setRequestProperty("Authorization", "Bearer " + token);
-					conn.setRequestProperty("Content-Type", "application/javascript");
-
-					String starterCode = "addEventListener('fetch', event => {\n" +
-										 "  event.respondWith(handleRequest(event.request))\n" +
-										 "})\n\n" +
-										 "async function handleRequest(request) {\n" +
-										 "  return new Response('New script initialized!', { status: 200 })\n" +
-										 "}";
-
-					OutputStream out = conn.getOutputStream();
-					out.write(starterCode.getBytes("UTF-8"));
-					out.flush();
-					out.close();
-
-					final int responseCode = conn.getResponseCode();
-					InputStream in = (responseCode >= 200 && responseCode < 300) ? conn.getInputStream() : conn.getErrorStream();
-					reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-					StringBuilder sb = new StringBuilder();
-					String line;
-					while ((line = reader.readLine()) != null) sb.append(line);
-					final String responseData = sb.toString();
-
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (progressDialog != null) progressDialog.dismiss();
-							if (responseCode >= 200 && responseCode < 300) {
-								UiHelper.showMessage(MainActivity.this, "Worker '" + scriptName + "' created!");
-								fetchWorkersList(false); 
-							} else {
-								if (responseData.contains("permission") || responseData.contains("scope")) {
-									handleScopeError(responseData);
-								} else {
-									UiHelper.showError(MainActivity.this, "Gagal buat: " + responseData);
-								}
-							}
-						}
-					});
-
-				} catch (final Exception ex) {
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (progressDialog != null) progressDialog.dismiss();
-							UiHelper.showError(MainActivity.this, "Error: " + ex.getMessage());
-						}
-					});
-				} finally {
-					if (reader != null) {
-						try { reader.close(); } catch (Exception ignored) {}
-					}
-					if (conn != null) conn.disconnect();
-				}
-			}
-		}).start();
-	}
-	
-	// === DELETE WORKER ===
-	private void confirmDeleteWorker(final String workerName) {
-		new AlertDialog.Builder(this)
-			.setTitle("Hapus Worker")
-			.setMessage("Yakin ingin menghapus script '" + workerName + "'? Tindakan ini permanen!")
-			.setPositiveButton("Ya, Hapus", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					deleteWorkerFromCloudflare(workerName);
-				}
-			})
-			.setNegativeButton("Batal", null)
-			.show();
-	}
-
-	private void deleteWorkerFromCloudflare(final String workerName) {
-		final String token = mode.getString("cf_api_token", "");
-		final String accountId = mode.getString("cf_account_id", "");
-		
-		if (token.isEmpty() || accountId.isEmpty()) {
-			UiHelper.showMessage(this, "Token belum diatur.");
-			return;
-		}
-
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("Menghapus " + workerName + "...");
-		progressDialog.setCancelable(false);
-		progressDialog.show();
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				HttpURLConnection conn = null;
-				BufferedReader reader = null;
-				try {
-					URL url = new URL("https://api.cloudflare.com/client/v4/accounts/" + accountId + "/workers/scripts/" + workerName);
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("DELETE");
-					conn.setRequestProperty("Authorization", "Bearer " + token);
-
-					final int responseCode = conn.getResponseCode();
-					InputStream in = (responseCode >= 200 && responseCode < 300) ? conn.getInputStream() : conn.getErrorStream();
-					reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-					StringBuilder sb = new StringBuilder();
-					String line;
-					while ((line = reader.readLine()) != null) sb.append(line);
-					final String responseData = sb.toString();
-
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (progressDialog != null) progressDialog.dismiss();
-							if (responseCode >= 200 && responseCode < 300) {
-								UiHelper.showMessage(MainActivity.this, "🗑️ Worker '" + workerName + "' berhasil dihapus!");
-								fetchWorkersList(false);
-							} else {
-								if (responseData.contains("permission") || responseData.contains("scope")) {
-									handleScopeError(responseData);
-								} else {
-									UiHelper.showError(MainActivity.this, "Gagal hapus: " + responseData);
-								}
-							}
-						}
-					});
-
-				} catch (final Exception ex) {
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (progressDialog != null) progressDialog.dismiss();
-							UiHelper.showError(MainActivity.this, "Error: " + ex.getMessage());
-						}
-					});
-				} finally {
-					if (reader != null) {
-						try { reader.close(); } catch (Exception ignored) {}
-					}
-					if (conn != null) conn.disconnect();
-				}
-			}
-		}).start();
-	}
-
-	// === THEME ===
-	private void applyTheme() {
-		boolean isNight = mode.getString("night", "").equals("true");
-		ActionBar actionBar = getActionBar();
-
-		// Explicit palette per manual toggle state (independent of system DayNight,
-		// since this screen has its own dark/light switch via the ActionBar button)
-		int cardBg = isNight ? Color.parseColor("#141B26") : Color.parseColor("#FFFFFF");
-		int cardStroke = isNight ? Color.parseColor("#2A3441") : Color.parseColor("#E2E5EA");
-		int mainBg = isNight ? Color.parseColor("#0B0F17") : Color.parseColor("#F4F5F7");
-
-		linearMainBg.setBackgroundColor(mainBg);
-
-		GradientDrawable gdWorkers = new GradientDrawable();
-		gdWorkers.setColor(cardBg);
-		gdWorkers.setCornerRadius(dpToPx(18));
-		gdWorkers.setStroke(dpToPx(1), cardStroke);
-		cardWorkers.setBackground(gdWorkers);
-
-		GradientDrawable gdMonitor = new GradientDrawable();
-		gdMonitor.setColor(cardBg);
-		gdMonitor.setCornerRadius(dpToPx(18));
-		gdMonitor.setStroke(dpToPx(1), cardStroke);
-		cardMonitor.setBackground(gdMonitor);
-
-		GradientDrawable gdDb = new GradientDrawable();
-		gdDb.setColor(cardBg);
-		gdDb.setCornerRadius(dpToPx(18));
-		gdDb.setStroke(dpToPx(1), cardStroke);
-		cardDatabase.setBackground(gdDb);
-
-		int primaryColor = isNight ? Color.parseColor("#E8EAED") : Color.parseColor("#161B22");
-		int secondaryColor = isNight ? Color.parseColor("#8A94A3") : Color.parseColor("#5B6472");
-
-		tvCardTitle1.setTextColor(primaryColor);
-		tvCardTitleDb.setTextColor(primaryColor);
-		tvCardDescDb.setTextColor(secondaryColor);
-		tvMonitorTitle.setTextColor(primaryColor);
-
-		TextView tvLabel1 = findViewById(getFnmods("tv_label_status", "id"));
-		TextView tvLabel2 = findViewById(getFnmods("tv_label_limit", "id"));
-		TextView tvLabel3 = findViewById(getFnmods("tv_label_count", "id"));
-		if (tvLabel1 != null) tvLabel1.setTextColor(secondaryColor);
-		if (tvLabel2 != null) tvLabel2.setTextColor(secondaryColor);
-		if (tvLabel3 != null) tvLabel3.setTextColor(secondaryColor);
-
-		tvStatLimit.setTextColor(primaryColor);
-		if (!tvStatStatus.getText().toString().equals("Online") && !tvStatStatus.getText().toString().equals("Offline")) {
-			tvStatStatus.setTextColor(primaryColor);
-		}
-		tvStatCount.setTextColor(primaryColor);
-		etSearchWorker.setTextColor(primaryColor);
-
-		if (actionBar != null) {
-			int headerColor = isNight ? Color.parseColor("#0E1420") : Color.parseColor("#161D29");
-			actionBar.setBackgroundDrawable(new ColorDrawable(headerColor));
-		}
-
-		loadCachedWorkers();
-	}
-
-	private int dpToPx(int dp) {
-		float density = getResources().getDisplayMetrics().density;
-		return (int) (dp * density);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		if (menuItem.getItemId() == android.R.id.home) {
-			boolean isNight = mode.getString("night", "").equals("true");
-			mode.edit().putString("night", isNight ? "false" : "true").commit();
-			applyTheme();
-			return true;
-		}
-		return super.onOptionsItemSelected(menuItem);
-	}
-	
-	private void loadCachedWorkers() {
-		String cached = mode.getString("cf_cached_scripts", "{}");
-		if (!cached.isEmpty()) {
-			try {
-				JSONObject jsonObj = new JSONObject(cached);
-				if (jsonObj.has("result")) {
-					cachedWorkersArray = jsonObj.getJSONArray("result");
-					populateWorkersList(cachedWorkersArray);
-					tvListPlaceholder.setVisibility(cachedWorkersArray.length() == 0 ? View.VISIBLE : View.GONE);
-					tvStatStatus.setText("Cached");
-					updateStatusDot(false);
-					tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FFA75C") : Color.parseColor("#D96B16")));
-				}
-			} catch (Exception ignored) {}
-		}
-	}
-
-	// === RENDER LIST ===
-	private void populateWorkersList(JSONArray resultArr) {
-		linearWorkersList.removeAllViews();
-		
-		if (resultArr == null || resultArr.length() == 0) {
-			tvStatCount.setText("0");
-			tvListPlaceholder.setVisibility(View.VISIBLE);
-			return;
-		}
-		
-		tvStatCount.setText(String.valueOf(resultArr.length()));
-		tvListPlaceholder.setVisibility(View.GONE);
-		
-		boolean isNight = mode.getString("night", "").equals("true");
-		int primaryTextColor = isNight ? Color.parseColor("#E8EAED") : Color.parseColor("#161B22");
-		int secondaryTextColor = isNight ? Color.parseColor("#8A94A3") : Color.parseColor("#5B6472");
-		int dividerColor = isNight ? Color.parseColor("#2A3441") : Color.parseColor("#E2E5EA");
-
-		for (int j = 0; j < resultArr.length(); j++) {
-			try {
-				JSONObject script = resultArr.getJSONObject(j);
-				final String workerName = script.getString("id");
-				String modifiedOnStr = script.optString("modified_on", "");
-				if (modifiedOnStr.contains("T")) modifiedOnStr = modifiedOnStr.split("T")[0];
-				
-				LinearLayout row = new LinearLayout(this);
-				row.setOrientation(LinearLayout.HORIZONTAL);
-				row.setPadding(12, 16, 12, 16);
-				row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-				row.setClickable(true);
-				row.setFocusable(true);
-				android.util.TypedValue outValue = new android.util.TypedValue();
-				getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-				row.setBackgroundResource(outValue.resourceId);
-				
-				LinearLayout leftContainer = new LinearLayout(this);
-				leftContainer.setOrientation(LinearLayout.VERTICAL);
-				LinearLayout.LayoutParams leftParams = new LinearLayout.LayoutParams(0, -2, 1.0f);
-				leftContainer.setLayoutParams(leftParams);
-				
-				LinearLayout headerRow = new LinearLayout(this);
-				headerRow.setOrientation(LinearLayout.HORIZONTAL);
-				headerRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
-				
-				TextView tvName = new TextView(this);
-				tvName.setText(workerName);
-				tvName.setTextSize(15);
-				tvName.setTypeface(null, android.graphics.Typeface.BOLD);
-				tvName.setTextColor(primaryTextColor);
-				headerRow.addView(tvName);
-				
-				TextView tvBadge = new TextView(this);
-				tvBadge.setText("JS");
-				tvBadge.setTextSize(10);
-				tvBadge.setTypeface(null, android.graphics.Typeface.BOLD);
-				tvBadge.setTextColor(Color.parseColor("#FFFFFF"));
-				GradientDrawable badgeBg = new GradientDrawable();
-				badgeBg.setColor(Color.parseColor("#F38020"));
-				badgeBg.setCornerRadius(100 * getResources().getDisplayMetrics().density);
-				tvBadge.setBackground(badgeBg);
-				tvBadge.setPadding(14, 4, 14, 4);
-				headerRow.addView(tvBadge);
-				leftContainer.addView(headerRow);
-				
-				TextView tvSub = new TextView(this);
-				tvSub.setText("Updated: " + (modifiedOnStr.isEmpty() ? "N/A" : modifiedOnStr));
-				tvSub.setTextSize(11);
-				tvSub.setPadding(0, 4, 0, 0);
-				tvSub.setTextColor(secondaryTextColor);
-				leftContainer.addView(tvSub);
-				
-				row.addView(leftContainer);
-				
-				// Tombol Delete
-				TextView tvDelete = new TextView(this);
-				tvDelete.setText("Hapus");
-				tvDelete.setTextSize(12);
-				tvDelete.setTypeface(null, android.graphics.Typeface.BOLD);
-				tvDelete.setTextColor(Color.parseColor("#D6483F"));
-				tvDelete.setPadding(20, 8, 8, 8);
-				tvDelete.setClickable(true);
-				tvDelete.setFocusable(true);
-				tvDelete.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						confirmDeleteWorker(workerName);
-					}
-				});
-				row.addView(tvDelete);
-				
-				row.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						Intent intent = new Intent(MainActivity.this, SecundActivity.class);
-						intent.putExtra("WORKER_NAME", workerName);
-						startActivity(intent);
-					}
-				});
-				
-				linearWorkersList.addView(row);
-				
-				if (j < resultArr.length() - 1) {
-					View divider = new View(this);
-					LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams(-1, 2);
-					divParams.setMargins(8, 0, 8, 0);
-					divider.setLayoutParams(divParams);
-					divider.setBackgroundColor(dividerColor);
-					linearWorkersList.addView(divider);
-				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	// === SEARCH ===
-	private void filterWorkers(String query) {
-		if (cachedWorkersArray == null || cachedWorkersArray.length() == 0) {
-			linearWorkersList.removeAllViews();
-			tvListPlaceholder.setVisibility(View.VISIBLE);
-			return;
-		}
-		
-		if (query.isEmpty()) {
-			populateWorkersList(cachedWorkersArray);
-			return;
-		}
-
-		JSONArray filtered = new JSONArray();
-		try {
-			for (int i = 0; i < cachedWorkersArray.length(); i++) {
-				JSONObject item = cachedWorkersArray.getJSONObject(i);
-				String name = item.getString("id");
-				if (name.toLowerCase().contains(query.toLowerCase())) {
-					filtered.put(item);
-				}
-			}
-			populateWorkersList(filtered);
-			if (filtered.length() == 0) {
-				tvListPlaceholder.setVisibility(View.VISIBLE);
-				tvListPlaceholder.setText("Script '" + query + "' tidak ditemukan.");
-			} else {
-				tvListPlaceholder.setVisibility(View.GONE);
-			}
-		} catch (Exception e) {
-			// ignore
-		}
-	}
-
-	// === FETCH WORKERS ===
-	private void fetchWorkersList(final boolean showBlocking) {
-		final String token = mode.getString("cf_api_token", "");
-		final String accountId = mode.getString("cf_account_id", "");
-		
-		if (token.isEmpty() || accountId.isEmpty()) {
-			tvListPlaceholder.setText("Set your Cloudflare API Token above to begin.");
-			tvStatStatus.setText("Unconfigured");
-			updateStatusDot(false);
-			tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FFA75C") : Color.parseColor("#D96B16")));
-			return;
-		}
-
-		tvListPlaceholder.setText("Synchronizing...");
-		
-		if (showBlocking) {
-			progressDialog = new ProgressDialog(this);
-			progressDialog.setMessage("Synchronizing Scripts...");
-			progressDialog.setCancelable(false);
-			progressDialog.show();
-		}
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				HttpURLConnection conn = null;
-				BufferedReader reader = null;
-				try {
-					URL url = new URL("https://api.cloudflare.com/client/v4/accounts/" + accountId + "/workers/scripts");
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("GET");
-						conn.setRequestProperty("Authorization", "Bearer " + token);
-					conn.setRequestProperty("Content-Type", "application/json");
-
-					final int responseCode = conn.getResponseCode();
-					InputStream in = (responseCode >= 200 && responseCode < 300) ? conn.getInputStream() : conn.getErrorStream();
-					reader = new BufferedReader(new InputStreamReader(in));
-					StringBuilder sb = new StringBuilder();
-					String line;
-					while ((line = reader.readLine()) != null) sb.append(line);
-					final String jsonResponse = sb.toString();
-
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (progressDialog != null) progressDialog.dismiss();
-							try {
-								if (responseCode < 200 || responseCode >= 300) {
-									tvListPlaceholder.setText("Error (" + responseCode + ")");
-									tvStatStatus.setText("Error");
-									updateStatusDot(false);
-									tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
-									if (jsonResponse.contains("permission") || jsonResponse.contains("scope")) {
-										handleScopeError(jsonResponse);
-									}
-									return;
-								}
-
-								JSONObject jsonObj = new JSONObject(jsonResponse);
-								boolean success = jsonObj.getBoolean("success");
-
-								if (success) {
-									JSONArray resultArr = jsonObj.getJSONArray("result");
-									cachedWorkersArray = resultArr;
-									populateWorkersList(resultArr);
-									tvListPlaceholder.setVisibility(resultArr.length() == 0 ? View.VISIBLE : View.GONE);
-									tvStatStatus.setText("Online");
-									updateStatusDot(true);
-									tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#3DDC97") : Color.parseColor("#1E9E6B")));
-									mode.edit().putString("cf_cached_scripts", jsonResponse).commit();
-								} else {
-									if (jsonResponse.contains("permission") || jsonResponse.contains("scope")) {
-										handleScopeError(jsonResponse);
-									} else {
-										tvListPlaceholder.setText("Authorization Rejected");
-										tvStatStatus.setText("Rejected");
-										updateStatusDot(false);
-										tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
-									}
-								}
-							} catch (Exception ex) {
-								tvListPlaceholder.setText("Failed to parse data");
-								tvStatStatus.setText("Parser Error");
-								updateStatusDot(false);
-								tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
-							}
-						}
-					});
-				} catch (final Exception ex) {
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (progressDialog != null) progressDialog.dismiss();
-							tvListPlaceholder.setText("Network error.");
-							tvStatStatus.setText("Offline");
-							updateStatusDot(false);
-							tvStatStatus.setTextColor((mode.getString("night","").equals("true") ? Color.parseColor("#FF6B61") : Color.parseColor("#D6483F")));
-						}
-					});
-				} finally {
-					if (reader != null) {
-						try { reader.close(); } catch (Exception ignored) {}
-					}
-					if (conn != null) conn.disconnect();
-				}
-			}
-		}).start();
-	}
-	
-	private void fetchAccountSubdomain() {
-		final String token = mode.getString("cf_api_token", "");
-		final String accountId = mode.getString("cf_account_id", "");
-		if (token.isEmpty() || accountId.isEmpty()) return;
-		
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				HttpURLConnection conn = null;
-				BufferedReader reader = null;
-				try {
-					URL url = new URL("https://api.cloudflare.com/client/v4/accounts/" + accountId + "/workers/subdomain");
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("GET");
-					conn.setRequestProperty("Authorization", "Bearer " + token);
-					
-					final int code = conn.getResponseCode();
-					if (code >= 200 && code < 300) {
-						InputStream in = new BufferedInputStream(conn.getInputStream());
-						reader = new BufferedReader(new InputStreamReader(in));
-						StringBuilder sb = new StringBuilder();
-						String line;
-						while ((line = reader.readLine()) != null) sb.append(line);
-						final String json = sb.toString();
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									JSONObject obj = new JSONObject(json);
-									if (obj.optBoolean("success", false)) {
-										JSONObject result = obj.optJSONObject("result");
-										if (result != null) {
-											String subdomain = result.optString("subdomain", "");
-											if (!subdomain.isEmpty()) {
-												mode.edit().putString("cf_subdomain", subdomain).commit();
-												tvSubdomain.setText(subdomain + ".workers.dev");
-												tvSubdomain.setVisibility(View.VISIBLE);
-											}
-										}
-									}
-								} catch (Exception ignored) {}
-							}
-						});
-					}
-				} catch (Exception ignored) {
-				} finally {
-					if (reader != null) {
-						try { reader.close(); } catch (Exception ignored) {}
-					}
-					if (conn != null) conn.disconnect();
-				}
-			}
-		}).start();
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (progressDialog != null && progressDialog.isShowing()) {
-			progressDialog.dismiss();
-			progressDialog = null;
-		}
-	}
-	
-	public int getFnmods(String name, String type) {
-		return this.getBaseContext().getResources().getIdentifier(name, type, this.getBaseContext().getPackageName());
-	}
-
-	private void updateStatusDot(boolean online) {
-		if (viewStatusDot != null) {
-			viewStatusDot.setBackgroundResource(online ? getFnmods("dot_status_online", "drawable") : getFnmods("dot_status_offline", "drawable"));
-		}
-	}
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class MainActivity extends AppCompatActivity {
+
+    // ── Views ────────────────────────────────────────────────────────────────
+    private LinearLayout linearWorkersList;
+    private TextView tvAccount, tvSubdomain;
+    private TextView tvStatStatus, tvStatLimit, tvStatCount;
+    private TextView tvListPlaceholder;
+    private View viewStatusDot;
+    private MaterialButton tvSwitchAccount;
+    private MaterialButton tvRefreshBtn;
+    private MaterialButton tvCreateWorkerBtn;
+    private MaterialButton btnManageLicenses;
+    private TextInputEditText etSearchWorker;
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    private SharedPreferences prefs;
+    private JSONArray cachedWorkersArray = new JSONArray();
+    private boolean isFetching = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Handle system bar insets
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.coordinator_main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        prefs = getSharedPreferences("mode", MODE_PRIVATE);
+
+        bindViews();
+        setupListeners();
+        checkTokenStatus();
+        loadCachedWorkers();
+        fetchWorkersList(false);
+        fetchAccountSubdomain();
+    }
+
+    // ── View Binding ──────────────────────────────────────────────────────────
+    private void bindViews() {
+        linearWorkersList = findViewById(R.id.linear_workers_list);
+        tvAccount         = findViewById(R.id.tv_account);
+        tvSubdomain       = findViewById(R.id.tv_subdomain);
+        tvStatStatus      = findViewById(R.id.tv_stat_status);
+        tvStatLimit       = findViewById(R.id.tv_stat_limit);
+        tvStatCount       = findViewById(R.id.tv_stat_count);
+        tvListPlaceholder = findViewById(R.id.tv_list_placeholder);
+        viewStatusDot     = findViewById(R.id.view_status_dot);
+        tvSwitchAccount   = findViewById(R.id.tv_switch_account);
+        tvRefreshBtn      = findViewById(R.id.tv_refresh_btn);
+        tvCreateWorkerBtn = findViewById(R.id.tv_create_worker_btn);
+        btnManageLicenses = findViewById(R.id.btn_manage_licenses);
+        etSearchWorker    = findViewById(R.id.et_search_worker);
+    }
+
+    private void setupListeners() {
+        tvAccount.setOnClickListener(v -> showApiTokenDialog());
+        tvSwitchAccount.setOnClickListener(v -> showSwitchAccountDialog());
+        tvRefreshBtn.setOnClickListener(v -> {
+            fetchWorkersList(true);
+            fetchAccountSubdomain();
+        });
+        tvCreateWorkerBtn.setOnClickListener(v -> showCreateWorkerDialog());
+        btnManageLicenses.setOnClickListener(v -> startActivity(new Intent(this, LicenseActivity.class)));
+
+        etSearchWorker.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+            public void onTextChanged(CharSequence s, int st, int b, int c) {
+                filterWorkers(s.toString());
+            }
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    // ── Account State ─────────────────────────────────────────────────────────
+    private void checkTokenStatus() {
+        String token = prefs.getString("cf_api_token", "");
+        String name  = prefs.getString("cf_account_name", "");
+        if (token.isEmpty()) {
+            tvAccount.setText("Tap to set up API Token");
+            tvSubdomain.setVisibility(View.GONE);
+            tvSwitchAccount.setVisibility(View.GONE);
+        } else {
+            tvAccount.setText(name.isEmpty() ? "Account configured" : name);
+            tvSwitchAccount.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // ── Switch / Delete Account ───────────────────────────────────────────────
+    private void showSwitchAccountDialog() {
+        String json = prefs.getString("cf_accounts_list", "[]");
+        final String[] names;
+        final String[] data;
+        try {
+            JSONArray arr = new JSONArray(json);
+            names = new String[arr.length()];
+            data  = new String[arr.length()];
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject o = arr.getJSONObject(i);
+                String id = o.getString("account_id");
+                names[i] = o.getString("name") + " (" + id.substring(0, Math.min(8, id.length())) + "...)";
+                data[i]  = o.toString();
+            }
+        } catch (Exception e) {
+            UiHelper.showError(this, "Failed to load accounts.");
+            return;
+        }
+        if (names.length == 0) {
+            UiHelper.showMessage(this, "No saved accounts. Set up a token first.");
+            return;
+        }
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("Switch Account")
+            .setItems(names, (d, which) -> {
+                try {
+                    JSONObject sel = new JSONObject(data[which]);
+                    prefs.edit()
+                        .putString("cf_api_token",    sel.getString("token"))
+                        .putString("cf_account_id",   sel.getString("account_id"))
+                        .putString("cf_account_name", sel.getString("name"))
+                        .apply();
+                    UiHelper.showMessage(this, "Switched to: " + sel.getString("name"));
+                    checkTokenStatus();
+                    fetchWorkersList(true);
+                    fetchAccountSubdomain();
+                } catch (Exception ex) {
+                    UiHelper.showError(this, "Failed to switch account.");
+                }
+            })
+            .setNegativeButton("Add Account", (d, w) -> showApiTokenDialog())
+            .setNeutralButton("Remove Account", (d, w) -> showDeleteAccountDialog())
+            .show();
+    }
+
+    private void showDeleteAccountDialog() {
+        String json = prefs.getString("cf_accounts_list", "[]");
+        final String[] names;
+        final JSONArray arr;
+        try {
+            arr = new JSONArray(json);
+            names = new String[arr.length()];
+            for (int i = 0; i < arr.length(); i++)
+                names[i] = arr.getJSONObject(i).getString("name");
+        } catch (Exception e) {
+            UiHelper.showError(this, "Error reading accounts.");
+            return;
+        }
+        if (names.length == 0) return;
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("Remove Account")
+            .setItems(names, (d, which) -> {
+                try {
+                    arr.remove(which);
+                    prefs.edit().putString("cf_accounts_list", arr.toString()).apply();
+                    UiHelper.showMessage(this, "Account removed.");
+                    checkTokenStatus();
+                } catch (Exception e) {
+                    UiHelper.showError(this, "Failed to remove.");
+                }
+            })
+            .show();
+    }
+
+    // ── API Token Dialog ──────────────────────────────────────────────────────
+    private void showApiTokenDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_token_input, null, false);
+        EditText etToken = dialogView.findViewById(R.id.et_dialog_token);
+        if (etToken == null) {
+            // fallback: plain EditText
+            etToken = new EditText(this);
+            etToken.setHint("Paste Cloudflare API Token…");
+            etToken.setSingleLine(true);
+        }
+        final EditText finalEt = etToken;
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("Add Cloudflare Account")
+            .setMessage("Enter your API Token. Account ID is detected automatically.")
+            .setView(dialogView != null ? dialogView : etToken)
+            .setPositiveButton("Verify & Save", (d, w) -> {
+                String t = finalEt.getText().toString().trim();
+                if (t.isEmpty()) { UiHelper.showMessage(this, "Token cannot be empty."); return; }
+                prefs.edit().putString("cf_api_token", t).apply();
+                checkTokenStatus();
+                verifyTokenAndFetchAccountId(true);
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    // ── Token Verification ────────────────────────────────────────────────────
+    private void verifyTokenAndFetchAccountId(boolean saveToList) {
+        String token = prefs.getString("cf_api_token", "");
+        if (token.isEmpty()) { UiHelper.showMessage(this, "Token is empty."); return; }
+        showLoading(tvListPlaceholder, "Verifying token…");
+        new Thread(() -> {
+            try {
+                CloudflareApi.Response r = CloudflareApi.get("/accounts", token);
+                runOnUiThread(() -> {
+                    try {
+                        JSONObject obj = new JSONObject(r.body);
+                        if (obj.optBoolean("success", false)) {
+                            JSONArray res = obj.getJSONArray("result");
+                            if (res.length() > 0) {
+                                JSONObject acct = res.getJSONObject(0);
+                                String id   = acct.getString("id");
+                                String name = acct.getString("name");
+                                prefs.edit()
+                                    .putString("cf_account_id",   id)
+                                    .putString("cf_account_name", name)
+                                    .apply();
+                                if (saveToList) saveAccountToPrefs(name, id, token);
+                                UiHelper.showMessage(this, "Connected: " + name);
+                                fetchWorkersList(false);
+                                fetchAccountSubdomain();
+                                checkTokenStatus();
+                            }
+                        } else {
+                            handleScopeError(r.body);
+                        }
+                    } catch (Exception ex) {
+                        UiHelper.showError(this, "Failed to parse API response.");
+                    }
+                });
+            } catch (Exception ex) {
+                runOnUiThread(() -> UiHelper.showError(this, "Network error: " + ex.getMessage()));
+            }
+        }).start();
+    }
+
+    private void saveAccountToPrefs(String name, String id, String token) {
+        try {
+            JSONArray arr = new JSONArray(prefs.getString("cf_accounts_list", "[]"));
+            for (int i = 0; i < arr.length(); i++) {
+                if (arr.getJSONObject(i).getString("account_id").equals(id)) return;
+            }
+            JSONObject o = new JSONObject();
+            o.put("name", name); o.put("account_id", id); o.put("token", token);
+            arr.put(o);
+            prefs.edit().putString("cf_accounts_list", arr.toString()).apply();
+        } catch (Exception ignored) {}
+    }
+
+    // ── Scope Error ───────────────────────────────────────────────────────────
+    private void handleScopeError(String body) {
+        try {
+            JSONObject obj = new JSONObject(body);
+            JSONArray errors = obj.getJSONArray("errors");
+            if (errors.length() > 0) {
+                String msg = errors.getJSONObject(0).getString("message");
+                String lower = msg.toLowerCase();
+                if (lower.contains("permission") || lower.contains("scope") || lower.contains("authorization")) {
+                    showScopeDialog(msg); return;
+                }
+            }
+        } catch (Exception ignored) {}
+        UiHelper.showError(this, "API error. Check token permissions.");
+    }
+
+    private void showScopeDialog(String errorMsg) {
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("Insufficient Token Permissions")
+            .setMessage("Your token lacks required scopes.\n\n" +
+                "Error: " + errorMsg + "\n\n" +
+                "Required scopes:\n" +
+                "• Workers Scripts: Edit\n" +
+                "• Workers KV: Edit\n" +
+                "• Workers Secrets: Edit")
+            .setPositiveButton("Open Token Dashboard", (d, w) ->
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://dash.cloudflare.com/profile/api-tokens"))))
+            .setNegativeButton("Close", null)
+            .show();
+    }
+
+    // ── Create Worker ─────────────────────────────────────────────────────────
+    private void showCreateWorkerDialog() {
+        final EditText input = new EditText(this);
+        input.setHint("script-name (e.g. my-api)");
+        input.setSingleLine(true);
+        LinearLayout wrapper = new LinearLayout(this);
+        wrapper.setOrientation(LinearLayout.VERTICAL);
+        wrapper.setPadding(dpToPx(24), dpToPx(8), dpToPx(24), 0);
+        wrapper.addView(input);
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("Create New Worker")
+            .setMessage("Initialize a new Cloudflare Workers script.")
+            .setView(wrapper)
+            .setPositiveButton("Create", (d, w) -> {
+                String name = input.getText().toString().trim().toLowerCase().replace(" ", "-");
+                if (!name.isEmpty()) createWorker(name);
+                else UiHelper.showMessage(this, "Name cannot be empty.");
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void createWorker(String scriptName) {
+        String token = prefs.getString("cf_api_token", "");
+        String acctId = prefs.getString("cf_account_id", "");
+        if (token.isEmpty() || acctId.isEmpty()) {
+            UiHelper.showMessage(this, "Configure API token first."); return;
+        }
+        showLoading(tvListPlaceholder, "Creating " + scriptName + "…");
+        String starterJs = "addEventListener('fetch', event => {\n" +
+                           "  event.respondWith(handleRequest(event.request))\n})\n\n" +
+                           "async function handleRequest(request) {\n" +
+                           "  return new Response('Hello from " + scriptName + "!', { status: 200 })\n}";
+        new Thread(() -> {
+            try {
+                CloudflareApi.Response r = CloudflareApi.putScript(
+                    "/accounts/" + acctId + "/workers/scripts/" + scriptName, token, starterJs);
+                runOnUiThread(() -> {
+                    if (r.isSuccess()) {
+                        UiHelper.showMessage(this, "Worker '" + scriptName + "' created!");
+                        fetchWorkersList(false);
+                    } else {
+                        if (r.body.contains("permission") || r.body.contains("scope"))
+                            handleScopeError(r.body);
+                        else
+                            UiHelper.showError(this, "Create failed: " + r.code);
+                    }
+                });
+            } catch (Exception ex) {
+                runOnUiThread(() -> UiHelper.showError(this, "Network error: " + ex.getMessage()));
+            }
+        }).start();
+    }
+
+    // ── Delete Worker ─────────────────────────────────────────────────────────
+    private void confirmDeleteWorker(String name) {
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("Delete Worker")
+            .setMessage("Permanently delete '" + name + "'? This cannot be undone.")
+            .setPositiveButton("Delete", (d, w) -> deleteWorker(name))
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void deleteWorker(String name) {
+        String token  = prefs.getString("cf_api_token",  "");
+        String acctId = prefs.getString("cf_account_id", "");
+        if (token.isEmpty() || acctId.isEmpty()) return;
+        new Thread(() -> {
+            try {
+                CloudflareApi.Response r = CloudflareApi.delete(
+                    "/accounts/" + acctId + "/workers/scripts/" + name, token);
+                runOnUiThread(() -> {
+                    if (r.isSuccess()) {
+                        UiHelper.showMessage(this, "'" + name + "' deleted.");
+                        fetchWorkersList(false);
+                    } else {
+                        UiHelper.showError(this, "Delete failed: " + r.code);
+                    }
+                });
+            } catch (Exception ex) {
+                runOnUiThread(() -> UiHelper.showError(this, "Network error: " + ex.getMessage()));
+            }
+        }).start();
+    }
+
+    // ── Workers List ──────────────────────────────────────────────────────────
+    private void fetchWorkersList(boolean showProgress) {
+        String token  = prefs.getString("cf_api_token",  "");
+        String acctId = prefs.getString("cf_account_id", "");
+        if (token.isEmpty() || acctId.isEmpty()) {
+            tvListPlaceholder.setText("Set your Cloudflare API Token to load scripts.");
+            setStatus("Unconfigured", false, 0xFFD96B16);
+            return;
+        }
+        if (isFetching) return;
+        isFetching = true;
+        if (!showProgress) showLoading(tvListPlaceholder, "Syncing…");
+        new Thread(() -> {
+            try {
+                CloudflareApi.Response r = CloudflareApi.get(
+                    "/accounts/" + acctId + "/workers/scripts", token);
+                runOnUiThread(() -> {
+                    isFetching = false;
+                    try {
+                        if (!r.isSuccess()) {
+                            setStatus("Error", false, 0xFFD6483F);
+                            if (r.body.contains("permission") || r.body.contains("scope"))
+                                handleScopeError(r.body);
+                            return;
+                        }
+                        JSONObject obj = new JSONObject(r.body);
+                        if (obj.optBoolean("success", false)) {
+                            JSONArray result = obj.getJSONArray("result");
+                            cachedWorkersArray = result;
+                            prefs.edit().putString("cf_cached_scripts", r.body).apply();
+                            populateWorkersList(result);
+                            setStatus("Online", true, 0xFF1E9E6B);
+                        } else {
+                            setStatus("Rejected", false, 0xFFD6483F);
+                            handleScopeError(r.body);
+                        }
+                    } catch (Exception ex) {
+                        setStatus("Parse Error", false, 0xFFD6483F);
+                    }
+                });
+            } catch (Exception ex) {
+                runOnUiThread(() -> {
+                    isFetching = false;
+                    setStatus("Offline", false, 0xFFD6483F);
+                    tvListPlaceholder.setText("Network unavailable.");
+                });
+            }
+        }).start();
+    }
+
+    private void fetchAccountSubdomain() {
+        String token  = prefs.getString("cf_api_token",  "");
+        String acctId = prefs.getString("cf_account_id", "");
+        if (token.isEmpty() || acctId.isEmpty()) return;
+        new Thread(() -> {
+            try {
+                CloudflareApi.Response r = CloudflareApi.get(
+                    "/accounts/" + acctId + "/workers/subdomain", token);
+                if (r.isSuccess()) {
+                    JSONObject obj = new JSONObject(r.body);
+                    if (obj.optBoolean("success", false)) {
+                        JSONObject res = obj.optJSONObject("result");
+                        if (res != null) {
+                            String sub = res.optString("subdomain", "");
+                            if (!sub.isEmpty()) {
+                                prefs.edit().putString("cf_subdomain", sub).apply();
+                                runOnUiThread(() -> {
+                                    tvSubdomain.setText(sub + ".workers.dev");
+                                    tvSubdomain.setVisibility(View.VISIBLE);
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        }).start();
+    }
+
+    // ── List Population ───────────────────────────────────────────────────────
+    private void populateWorkersList(JSONArray arr) {
+        linearWorkersList.removeAllViews();
+        if (arr == null || arr.length() == 0) {
+            tvStatCount.setText("0");
+            tvListPlaceholder.setVisibility(View.VISIBLE);
+            tvListPlaceholder.setText("No scripts found. Tap '+ New' to create one.");
+            return;
+        }
+        tvStatCount.setText(String.valueOf(arr.length()));
+        tvListPlaceholder.setVisibility(View.GONE);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (int i = 0; i < arr.length(); i++) {
+            try {
+                JSONObject script = arr.getJSONObject(i);
+                final String workerName = script.getString("id");
+                String date = script.optString("modified_on", "");
+                if (date.contains("T")) date = date.split("T")[0];
+                final String displayDate = date;
+
+                View row = inflater.inflate(R.layout.item_worker, linearWorkersList, false);
+                ((TextView) row.findViewById(R.id.tv_item_name)).setText(workerName);
+                ((TextView) row.findViewById(R.id.tv_item_date)).setText(
+                    displayDate.isEmpty() ? "Updated: —" : "Updated: " + displayDate);
+
+                row.setOnClickListener(v -> {
+                    Intent intent = new Intent(this, SecundActivity.class);
+                    intent.putExtra("WORKER_NAME", workerName);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.fade_out);
+                });
+
+                row.findViewById(R.id.btn_item_delete).setOnClickListener(v ->
+                    confirmDeleteWorker(workerName));
+
+                UiHelper.animateFadeIn(row);
+                linearWorkersList.addView(row);
+
+                // Divider
+                if (i < arr.length() - 1) {
+                    View divider = new View(this);
+                    LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, 1);
+                    p.setMargins(0, 0, 0, 0);
+                    divider.setLayoutParams(p);
+                    divider.setBackgroundColor(ContextCompat.getColor(this, R.color.md_outline_variant));
+                    linearWorkersList.addView(divider);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // ── Search ────────────────────────────────────────────────────────────────
+    private void filterWorkers(String query) {
+        if (cachedWorkersArray == null || cachedWorkersArray.length() == 0) {
+            tvListPlaceholder.setVisibility(View.VISIBLE);
+            return;
+        }
+        if (query.isEmpty()) { populateWorkersList(cachedWorkersArray); return; }
+        JSONArray filtered = new JSONArray();
+        try {
+            for (int i = 0; i < cachedWorkersArray.length(); i++) {
+                JSONObject item = cachedWorkersArray.getJSONObject(i);
+                if (item.getString("id").toLowerCase().contains(query.toLowerCase()))
+                    filtered.put(item);
+            }
+            populateWorkersList(filtered);
+            if (filtered.length() == 0) {
+                tvListPlaceholder.setVisibility(View.VISIBLE);
+                tvListPlaceholder.setText("No scripts match '" + query + "'.");
+            }
+        } catch (Exception ignored) {}
+    }
+
+    // ── Cache ─────────────────────────────────────────────────────────────────
+    private void loadCachedWorkers() {
+        String cached = prefs.getString("cf_cached_scripts", "{}");
+        if (cached.isEmpty() || cached.equals("{}")) return;
+        try {
+            JSONObject obj = new JSONObject(cached);
+            if (obj.has("result")) {
+                cachedWorkersArray = obj.getJSONArray("result");
+                populateWorkersList(cachedWorkersArray);
+                setStatus("Cached", false, 0xFFD96B16);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    // ── UI Helpers ────────────────────────────────────────────────────────────
+    private void setStatus(String label, boolean online, int color) {
+        tvStatStatus.setText(label);
+        tvStatStatus.setTextColor(color);
+        if (viewStatusDot != null) {
+            viewStatusDot.setBackgroundResource(
+                online ? R.drawable.dot_status_online : R.drawable.dot_status_offline);
+        }
+    }
+
+    private void showLoading(TextView placeholder, String msg) {
+        placeholder.setText(msg);
+        placeholder.setVisibility(View.VISIBLE);
+    }
+
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density);
+    }
 }

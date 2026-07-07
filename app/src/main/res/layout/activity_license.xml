@@ -1,294 +1,345 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/linear_license_bg"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinator_license"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/bg_app"
-    android:padding="20dp">
+    android:background="@color/md_background">
 
-    <!-- Database KV Setup Bar -->
-    <LinearLayout
-        android:id="@+id/card_kv_setup"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="18dp"
-        android:elevation="3dp"
-        android:layout_marginBottom="18dp"
-        android:background="@drawable/bg_card">
+        android:background="@color/header_bg">
 
-        <TextView
-            android:id="@+id/tv_kv_namespace_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Database KV namespace ID"
-            style="@style/Label.Section"
-            android:textSize="12sp"/>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_license"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:paddingTop="8dp"
+            app:navigationIcon="@drawable/ic_theme"
+            app:navigationIconTint="@color/text_on_header"
+            app:titleTextColor="@color/text_on_header" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/linear_license_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="9dp"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tv_kv_namespace_id"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Tap to set KV Namespace ID..."
-                android:textSize="13sp"
-                android:fontFamily="monospace"
-                android:textColor="@color/cf_orange"
-                android:clickable="true"
-                android:focusable="true"/>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btn_create_namespace"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:paddingTop="11dp"
-            android:paddingBottom="11dp"
-            android:background="@drawable/bg_button_outline"
-            android:text="Create KV namespace"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textSize="12sp"
-            android:textColor="@color/cf_orange"/>
-    </LinearLayout>
-
-    <!-- Two Tab Buttons (segmented control) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="18dp">
-
-        <Button
-            android:id="@+id/btn_tab_keys"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:paddingTop="11dp"
-            android:paddingBottom="11dp"
-            android:background="@drawable/bg_tab_active"
-            android:text="Keys list"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textSize="13sp"
-            android:textColor="#0B0F17"
-            android:layout_marginEnd="5dp"/>
-
-        <Button
-            android:id="@+id/btn_tab_logs"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:paddingTop="11dp"
-            android:paddingBottom="11dp"
-            android:background="@drawable/bg_tab_inactive"
-            android:text="GEO access logs"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textSize="13sp"
-            android:textColor="@color/text_secondary_light"
-            android:layout_marginStart="5dp"/>
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="none">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- Tab 1: Keys Container -->
-            <LinearLayout
-                android:id="@+id/layout_tab_keys"
+            <!-- ── KV Setup Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_kv_setup"
+                style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <Button
-                    android:id="@+id/btn_generate_key"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="13dp"
-                    android:paddingBottom="13dp"
-                    android:background="@drawable/bg_button"
-                    android:text="Generate license key"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="@color/button_solid_text"
-                    android:layout_marginBottom="14dp"/>
+                android:layout_marginBottom="14dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/md_outline_variant"
+                app:cardBackgroundColor="@color/md_surface">
 
                 <LinearLayout
-                    android:id="@+id/container_keys_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="10dp"
-                    android:elevation="3dp"
-                    android:background="@drawable/bg_card"
-                    android:layout_marginBottom="18dp">
+                    android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/tv_keys_placeholder"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="No keys loaded. Set Namespace ID above."
-                        android:textSize="12sp"
-                        android:gravity="center"
-                        android:padding="22dp"
-                        android:textColor="@color/text_secondary_light"/>
-                </LinearLayout>
-            </LinearLayout>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
 
-            <!-- Tab 2: Logs Container -->
-            <LinearLayout
-                android:id="@+id/layout_tab_logs"
+                        <View
+                            android:layout_width="3dp"
+                            android:layout_height="18dp"
+                            android:layout_marginEnd="10dp"
+                            android:background="@drawable/bg_badge_accent" />
+
+                        <TextView
+                            android:id="@+id/tv_kv_namespace_label"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="KV Namespace"
+                            android:textStyle="bold"
+                            android:textSize="15sp"
+                            android:textColor="@color/md_on_surface" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_kv_namespace_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tap to set KV Namespace ID…"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:textColor="@color/cf_orange"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="12dp"
+                        android:background="@drawable/bg_editor"
+                        android:layout_marginBottom="14dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_create_namespace"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Create New"
+                            android:textAllCaps="false"
+                            android:textColor="@color/cf_orange"
+                            app:strokeColor="@color/cf_orange"
+                            app:cornerRadius="12dp"
+                            android:layout_marginEnd="10dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_generate_key"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Generate Key"
+                            android:textAllCaps="false"
+                            app:backgroundTint="@color/cf_orange"
+                            app:cornerRadius="12dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Keys / Logs Tabs Card ── -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:layout_marginBottom="14dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/md_outline_variant"
+                app:cardBackgroundColor="@color/md_surface">
 
                 <LinearLayout
-                    android:id="@+id/container_logs_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="10dp"
-                    android:elevation="3dp"
-                    android:layout_marginBottom="18dp"
-                    android:background="@drawable/bg_card">
+                    android:padding="16dp">
 
-                    <TextView
-                        android:id="@+id/tv_logs_placeholder"
+                    <!-- Tab row -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="No login logs collected yet."
-                        android:textSize="12sp"
-                        android:gravity="center"
-                        android:padding="22dp"
-                        android:textColor="@color/text_secondary_light"/>
-                </LinearLayout>
-            </LinearLayout>
+                        android:orientation="horizontal"
+                        android:background="@drawable/bg_editor"
+                        android:padding="4dp"
+                        android:layout_marginBottom="14dp">
 
-            <!-- Card: API Handshake Simulator -->
-            <LinearLayout
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_tab_keys"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Keys"
+                            android:textAllCaps="false"
+                            android:textStyle="bold"
+                            android:textColor="#FFFFFF"
+                            android:background="@drawable/bg_tab_active"
+                            app:rippleColor="@android:color/transparent" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_tab_logs"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Logs"
+                            android:textAllCaps="false"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:background="@drawable/bg_tab_inactive"
+                            app:rippleColor="@android:color/transparent" />
+                    </LinearLayout>
+
+                    <!-- Keys tab content -->
+                    <LinearLayout
+                        android:id="@+id/layout_tab_keys"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="visible">
+
+                        <LinearLayout
+                            android:id="@+id/container_keys_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_keys_placeholder"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="No license keys found. Set namespace and generate a key."
+                                android:gravity="center"
+                                android:padding="24dp"
+                                android:textSize="13sp"
+                                android:textColor="@color/md_on_surface_variant"
+                                android:visibility="visible" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Logs tab content -->
+                    <LinearLayout
+                        android:id="@+id/layout_tab_logs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:id="@+id/container_logs_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_logs_placeholder"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Tap a key in 'Keys' tab to view geo stats."
+                                android:gravity="center"
+                                android:padding="24dp"
+                                android:textSize="13sp"
+                                android:textColor="@color/md_on_surface_variant" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── API Simulator Card ── -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_simulator"
+                style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp"
-                android:elevation="3dp"
-                android:background="@drawable/bg_card">
-
-                <TextView
-                    android:id="@+id/tv_simulator_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="API handshake simulator"
-                    style="@style/Label.Section"/>
-
-                <TextView
-                    android:id="@+id/tv_simulator_desc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Simulate a validation check from your APK to test your script's integration."
-                    android:textSize="11sp"
-                    android:layout_marginTop="5dp"
-                    android:lineSpacingExtra="3dp"
-                    android:textColor="@color/text_secondary_light"/>
-
-                <EditText
-                    android:id="@+id/et_sim_url"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:hint="https://your-worker-url.workers.dev"
-                    android:textSize="13sp"
-                    android:fontFamily="monospace"
-                    android:singleLine="true"
-                    android:background="@drawable/bg_editor"
-                    android:textColorHint="@color/text_secondary_light"
-                    android:textColor="@color/text_primary_light"
-                    android:padding="13dp"/>
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/md_outline_variant"
+                app:cardBackgroundColor="@color/md_surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="11dp">
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/tv_simulator_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="API Verification Simulator"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/md_on_surface"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/tv_simulator_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Test your Worker's /check endpoint with a key and device ID."
+                        android:textSize="13sp"
+                        android:textColor="@color/md_on_surface_variant"
+                        android:layout_marginBottom="14dp"
+                        android:lineSpacingExtra="2dp" />
+
+                    <EditText
+                        android:id="@+id/et_sim_url"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Worker URL"
+                        android:singleLine="true"
+                        android:background="@drawable/bg_editor"
+                        android:padding="12dp"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="monospace"
+                        android:textColor="@color/md_on_surface"
+                        android:textColorHint="@color/md_on_surface_variant" />
 
                     <EditText
                         android:id="@+id/et_sim_key"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="License key"
-                        android:textSize="13sp"
-                        android:fontFamily="monospace"
                         android:singleLine="true"
                         android:background="@drawable/bg_editor"
-                        android:textColorHint="@color/text_secondary_light"
-                        android:textColor="@color/text_primary_light"
-                        android:padding="13dp"
-                        android:layout_marginEnd="7dp"/>
+                        android:padding="12dp"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="monospace"
+                        android:textColor="@color/md_on_surface"
+                        android:textColorHint="@color/md_on_surface_variant" />
 
                     <EditText
                         android:id="@+id/et_sim_device"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Device ID"
-                        android:textSize="13sp"
-                        android:fontFamily="monospace"
                         android:singleLine="true"
                         android:background="@drawable/bg_editor"
-                        android:textColorHint="@color/text_secondary_light"
-                        android:textColor="@color/text_primary_light"
-                        android:padding="13dp"
-                        android:layout_marginStart="7dp"/>
+                        android:padding="12dp"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="14dp"
+                        android:fontFamily="monospace"
+                        android:textColor="@color/md_on_surface"
+                        android:textColorHint="@color/md_on_surface_variant" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_run_sim"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Run Simulation"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/md_primary"
+                        app:cornerRadius="12dp"
+                        android:layout_marginBottom="14dp" />
+
+                    <TextView
+                        android:id="@+id/tv_sim_result"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="12sp"
+                        android:fontFamily="monospace"
+                        android:lineSpacingExtra="3dp"
+                        android:textColor="@color/md_on_surface_variant"
+                        android:background="@drawable/bg_editor"
+                        android:padding="12dp"
+                        android:visibility="visible" />
                 </LinearLayout>
-
-                <Button
-                    android:id="@+id/btn_run_sim"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:paddingTop="13dp"
-                    android:paddingBottom="13dp"
-                    android:background="@drawable/bg_button"
-                    android:text="Run validation check"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="@color/button_solid_text"/>
-
-                <TextView
-                    android:id="@+id/tv_sim_result"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Response output: waiting for simulation run..."
-                    android:textSize="11sp"
-                    android:textColor="@color/text_secondary_light"
-                    android:fontFamily="monospace"
-                    android:lineSpacingExtra="3dp"
-                    android:background="@drawable/bg_editor"
-                    android:padding="13dp"/>
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

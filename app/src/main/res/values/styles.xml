@@ -1,40 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/header_bg</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/bg_app</item>
-        <item name="android:statusBarColor">@color/header_bg</item>
-        <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
-        <item name="android:fontFamily">sans-serif</item>
-    </style>
-
-    <style name="AppTheme.NoHeader" parent="AppTheme">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <!-- Section / card title -->
+<resources>
+    <!-- Redirect legacy style references to Material3 theme -->
     <style name="Label.Section" parent="">
         <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/text_primary_light</item>
-        <item name="android:letterSpacing">0.01</item>
+        <item name="android:textColor">@color/md_on_surface</item>
     </style>
-
-    <!-- Small caption / metadata -->
     <style name="Label.Caption" parent="">
         <item name="android:textSize">11sp</item>
-        <item name="android:textColor">@color/text_secondary_light</item>
-        <item name="android:letterSpacing">0.02</item>
+        <item name="android:textColor">@color/md_on_surface_variant</item>
     </style>
-
-    <!-- Monospace, used for stats, ids, code -->
     <style name="Text.Mono" parent="">
         <item name="android:fontFamily">monospace</item>
-        <item name="android:textColor">@color/text_primary_light</item>
+        <item name="android:textColor">@color/md_on_surface</item>
     </style>
-
 </resources>
